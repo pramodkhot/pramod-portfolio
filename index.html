@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pramod Khot | QA Automation Engineer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="top-contact" aria-label="Quick contact">
+  <a
+    class="top-contact__email"
+    href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=Pramodkhot2026@gmail.com"
+    target="_blank"
+    rel="noopener noreferrer"
+  >Pramodkhot2026@gmail.com</a>
+  <a class="top-contact__phone" href="tel:+917620963525">7620963525</a>
+</div>
+
+<header class="hero">
+  <div class="container">
+    <img src="profile.jpg" alt="Profile" class="profile-img">
+    <h1>Pramod Khot</h1>
+    <p>SDET | Playwright | API Automation | CI/CD</p>
+    <button type="button" onclick="showContact()">Contact Me</button>
+  </div>
+</header>
+
+<section class="about section-panel">
+  <div class="section-panel__inner">
+    <h2>About Me</h2>
+    <p id="about-text"></p>
+  </div>
+</section>
+
+<section class="skills section-panel">
+  <div class="section-panel__inner">
+    <h2>Skills</h2>
+    <ul id="skills-list"></ul>
+  </div>
+</section>
+
+<section class="projects section-panel">
+  <div class="section-panel__inner">
+    <h2>Featured Projects</h2>
+    <div class="project-card">
+      <h3>AI-Powered QA Automation Suite</h3>
+      <p>Integrated JIRA, QASE & OpenAI to reduce manual QA effort by 70%+</p>
+    </div>
+
+    <div class="project-card">
+      <h3>Playwright Hybrid Framework</h3>
+      <p>End-to-end UI + API automation improving regression efficiency</p>
+    </div>
+
+    <div class="project-card">
+      <h3>Test Case Mapping Tool</h3>
+      <p>Reduced duplicate test cases by 60% using intelligent mapping</p>
+    </div>
+
+    <div class="project-snippets">
+      <h3 class="project-snippets__title">Project snippets</h3>
+      <div class="project-snippets__grid">
+        <figure class="project-snippet">
+          <img
+            src="TCM.png"
+            loading="lazy"
+            decoding="async"
+            alt="Everstream TCM Tool: search and suggested test cases with similarity scores"
+          >
+          <figcaption>Everstream TCM Tool</figcaption>
+        </figure>
+        <figure class="project-snippet">
+          <img
+            src="bugGEn.png"
+            loading="lazy"
+            decoding="async"
+            alt="Bug Report Generator: issue fields and generated bug report output"
+          >
+          <figcaption>Bug Report Generator</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact section-panel" id="contact">
+  <div class="section-panel__inner">
+    <h2>Contact</h2>
+    <p class="contact__links">
+      <a
+        href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=Pramodkhot2026@gmail.com"
+        target="_blank"
+        rel="noopener noreferrer"
+      >Email on Gmail</a>
+      <span class="contact__sep" aria-hidden="true"> · </span>
+      <a href="tel:+917620963525">7620963525</a>
+    </p>
+  </div>
+</section>
+
+<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to night mode" title="Day / night">
+  <span class="theme-toggle__icon" aria-hidden="true">☀</span>
+  <span class="theme-toggle__label">Night</span>
+</button>
+
+<script src="script.js"></script>
+</body>
+</html>
