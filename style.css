@@ -345,6 +345,25 @@ button:not(.theme-toggle):hover {
   font-size: 0.95rem;
 }
 
+.project-card--kathakar {
+  border-left: 3px solid var(--btn-primary);
+}
+
+.project-card__link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--btn-primary);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.project-card__link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
 .project-snippets {
   margin-top: 36px;
   padding-top: 32px;
