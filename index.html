@@ -1,84 +1,297 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pramod Khot | QA Automation Engineer</title>
+  <title>Pramod Khot — SDET & Indie Developer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="top-contact" aria-label="Quick contact">
-  <a
-    class="top-contact__email"
-    href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=Pramodkhot2026@gmail.com"
-    target="_blank"
-    rel="noopener noreferrer"
-  >Pramodkhot2026@gmail.com</a>
-  <span class="top-contact__sep" aria-hidden="true">·</span>
-  <a class="top-contact__phone" href="tel:+917620963525">7620963525</a>
-</div>
+<!-- Fixed nav -->
+<nav class="nav" aria-label="Primary navigation">
+  <div class="nav__inner">
+    <a href="#home" class="nav__brand">PK</a>
+    <div class="nav__links">
+      <a href="#kathakar" class="nav__link">KathaKar</a>
+      <a href="#craft" class="nav__link">QA Work</a>
+      <a href="#contact" class="nav__link">Contact</a>
+    </div>
+    <button class="nav__theme" id="theme-btn" aria-label="Toggle theme" type="button">
+      <span class="nav__theme-icon" aria-hidden="true">☀</span>
+    </button>
+  </div>
+</nav>
 
-<header class="hero">
+<!-- HERO -->
+<section class="hero" id="home" aria-label="Introduction">
+  <!-- Floating Indian script chars — each char is "K" in a different Indian language script -->
+  <div class="script-canvas" aria-hidden="true">
+    <span class="script-char" style="--x:4%;  --y:12%; --s:5rem;  --d:0s">क</span>
+    <span class="script-char" style="--x:16%; --y:55%; --s:3rem;  --d:5s">ক</span>
+    <span class="script-char" style="--x:28%; --y:78%; --s:4rem;  --d:2s">ക</span>
+    <span class="script-char" style="--x:42%; --y:22%; --s:2.5rem;--d:8s">க</span>
+    <span class="script-char" style="--x:55%; --y:65%; --s:3.5rem;--d:3s">ಕ</span>
+    <span class="script-char" style="--x:70%; --y:18%; --s:2.5rem;--d:6s">క</span>
+    <span class="script-char" style="--x:80%; --y:48%; --s:4.5rem;--d:1s">ਕ</span>
+    <span class="script-char" style="--x:88%; --y:75%; --s:2rem;  --d:7s">ક</span>
+    <span class="script-char" style="--x:9%;  --y:85%; --s:3rem;  --d:4s">ก</span>
+    <span class="script-char" style="--x:62%; --y:88%; --s:2.5rem;--d:9s">K</span>
+  </div>
+
+  <div class="hero__grid container">
+    <div class="hero__content">
+      <p class="hero__eyebrow">SDET · Indie Developer · Founder</p>
+      <h1 class="hero__name">Pramod<br>Khot</h1>
+      <p class="hero__sub">
+        Building robust test systems by day,<br>
+        building <em>KathaKar</em> — a home for Indian stories — by night.
+      </p>
+      <div class="hero__ctas">
+        <a href="https://play.google.com/store/apps/details?id=com.pramodkhot.kathakar"
+           target="_blank" rel="noopener noreferrer" class="btn btn--primary">
+          Get KathaKar
+        </a>
+        <a href="#craft" class="btn btn--ghost">QA Engineering</a>
+      </div>
+    </div>
+
+    <div class="hero__phone-wrap">
+      <div class="phone-glow" aria-hidden="true"></div>
+      <div class="phone">
+        <div class="phone__notch"></div>
+        <div class="phone__screen">
+          <div class="app-bar">
+            <span class="app-bar__name">KathaKar</span>
+            <div class="app-bar__right">
+              <span class="app-bar__icon">⬟</span>
+              <span class="app-bar__icon">🔔</span>
+              <div class="app-bar__avatar"></div>
+            </div>
+          </div>
+          <div class="app-search">🔍 Search stories, authors...</div>
+          <div class="app-chips">
+            <span class="app-chip app-chip--on">All</span>
+            <span class="app-chip">Romance</span>
+            <span class="app-chip">Thriller</span>
+            <span class="app-chip">Sci-Fi</span>
+          </div>
+          <div class="app-challenge">
+            <div class="app-challenge__head">
+              <span>📚 Reading Challenge</span>
+              <span class="app-challenge__met">Goal Met! 🎉</span>
+            </div>
+            <div class="app-challenge__stats">
+              <span><b>157</b> pages</span>
+              <span><b>43</b> today</span>
+              <span><b>20</b> goal</span>
+            </div>
+            <div class="app-challenge__track">
+              <div class="app-challenge__fill"></div>
+            </div>
+          </div>
+          <div class="app-story">
+            <div class="app-story__cover">
+              <span>The</span>
+              <span>Observer</span>
+            </div>
+            <div class="app-story__body">
+              <div class="app-story__title">The Observer</div>
+              <div class="app-story__author">by pramod khot</div>
+              <div class="app-story__tags">
+                <span class="app-stag">Sci-Fi</span>
+                <span class="app-stag">11 eps</span>
+              </div>
+              <div class="app-story__reads">👁 12 reads</div>
+            </div>
+          </div>
+          <div class="app-story app-story--2">
+            <div class="app-story__cover app-story__cover--b">
+              <span>मौन</span>
+              <span>के दस दिन</span>
+            </div>
+            <div class="app-story__body">
+              <div class="app-story__title">मौन के दस दिन</div>
+              <div class="app-story__author">by WORDS</div>
+              <div class="app-story__tags">
+                <span class="app-stag">Hindi</span>
+                <span class="app-stag">Drama</span>
+              </div>
+            </div>
+          </div>
+          <div class="app-nav">
+            <span class="app-nav__item app-nav__item--on">Read</span>
+            <span class="app-nav__item">Write</span>
+            <span class="app-nav__item">Poems</span>
+            <span class="app-nav__item">Library</span>
+            <span class="app-nav__item">Profile</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KATHAKAR FEATURE SECTION -->
+<section class="kk" id="kathakar" aria-label="KathaKar app">
   <div class="container">
-    <img src="profile.jpg" alt="Profile" class="profile-img">
-    <h1>Pramod Khot</h1>
-    <p>SDET | Playwright | API Automation | CI/CD</p>
-    <button type="button" onclick="showContact()">Contact Me</button>
-  </div>
-</header>
+    <header class="kk__header">
+      <p class="eyebrow">Personal Project · Live on Google Play</p>
+      <h2 class="display-title">KathaKar</h2>
+      <p class="kk__tagline">Write. Publish. Inspire.</p>
+      <p class="kk__desc">
+        A publishing platform for Indian literature — built solo from zero to Play Store.
+        Stories published in episodes, poems as standalone pieces, available in 9 Indian languages
+        including Hindi, Marathi, Bengali, Tamil, Telugu, and Gujarati.
+      </p>
+    </header>
 
-<section class="about section-panel">
-  <div class="section-panel__inner">
-    <h2>About Me</h2>
-    <p id="about-text"></p>
+    <div class="kk-numbers">
+      <div class="kk-num">
+        <span class="kk-num__val">9</span>
+        <span class="kk-num__label">Indian Languages</span>
+      </div>
+      <div class="kk-num">
+        <span class="kk-num__val">3</span>
+        <span class="kk-num__label">User Roles</span>
+      </div>
+      <div class="kk-num">
+        <span class="kk-num__val">100%</span>
+        <span class="kk-num__label">Kotlin</span>
+      </div>
+      <div class="kk-num">
+        <span class="kk-num__val">1</span>
+        <span class="kk-num__label">Developer</span>
+      </div>
+    </div>
+
+    <div class="kk-features">
+      <div class="kk-feat">
+        <div class="kk-feat__icon">📖</div>
+        <h3 class="kk-feat__title">Episode Reader</h3>
+        <p class="kk-feat__desc">Adjustable font size, night mode, reading progress tracking. Resume from exact page and scroll position.</p>
+      </div>
+      <div class="kk-feat">
+        <div class="kk-feat__icon">✍️</div>
+        <h3 class="kk-feat__title">Writer Studio</h3>
+        <p class="kk-feat__desc">Story and episode creation, cover image upload, per-story analytics — likes, comments, saves, reports.</p>
+      </div>
+      <div class="kk-feat">
+        <div class="kk-feat__icon">📜</div>
+        <h3 class="kk-feat__title">Poems Platform</h3>
+        <p class="kk-feat__desc">Free verse, Shayari, Haiku, Ghazal. Filterable by language, type, and mood. All poems free to read.</p>
+      </div>
+      <div class="kk-feat">
+        <div class="kk-feat__icon">🔔</div>
+        <h3 class="kk-feat__title">Real-time Notifications</h3>
+        <p class="kk-feat__desc">Firebase Cloud Messaging push notifications, live unread badge, follow system with follower counts.</p>
+      </div>
+      <div class="kk-feat">
+        <div class="kk-feat__icon">🛡️</div>
+        <h3 class="kk-feat__title">Admin Dashboard</h3>
+        <p class="kk-feat__desc">Role-based access — Reader, Writer, Admin. Full content moderation and platform management tools.</p>
+      </div>
+      <div class="kk-feat">
+        <div class="kk-feat__icon">📊</div>
+        <h3 class="kk-feat__title">Reading Challenges</h3>
+        <p class="kk-feat__desc">Daily reading goals, page tracking, progress bars. Gamified reading habits that keep users coming back.</p>
+      </div>
+    </div>
+
+    <div class="kk-stack">
+      <p class="kk-stack__label">Built with</p>
+      <div class="kk-stack__tags">
+        <span class="mono-tag">Kotlin</span>
+        <span class="mono-tag">Jetpack Compose</span>
+        <span class="mono-tag">Material 3</span>
+        <span class="mono-tag">MVVM + Hilt DI</span>
+        <span class="mono-tag">Firebase Firestore</span>
+        <span class="mono-tag">Firebase Auth</span>
+        <span class="mono-tag">Firebase Storage</span>
+        <span class="mono-tag">Firebase Cloud Messaging</span>
+        <span class="mono-tag">Google Sign-In</span>
+        <span class="mono-tag">Kotlin Coroutines</span>
+        <span class="mono-tag">StateFlow</span>
+        <span class="mono-tag">callbackFlow</span>
+        <span class="mono-tag">Coil</span>
+        <span class="mono-tag">Facebook Audience Network</span>
+        <span class="mono-tag">Play In-App Updates</span>
+        <span class="mono-tag">Play In-App Review API</span>
+        <span class="mono-tag">GitHub Actions CI</span>
+        <span class="mono-tag">R8 / ProGuard</span>
+        <span class="mono-tag">Gradle KTS</span>
+      </div>
+    </div>
+
+    <div class="kk-ctas">
+      <a href="https://play.google.com/store/apps/details?id=com.pramodkhot.kathakar"
+         target="_blank" rel="noopener noreferrer" class="btn btn--primary btn--lg">
+        ▶&nbsp; Get it on Google Play
+      </a>
+      <a href="https://whatsapp.com/channel/0029Vb7g1mf4SpkJRLVfcO1n"
+         target="_blank" rel="noopener noreferrer" class="btn btn--wa btn--lg">
+        📲&nbsp; Follow on WhatsApp
+      </a>
+    </div>
   </div>
 </section>
 
-<section class="skills section-panel">
-  <div class="section-panel__inner">
-    <h2>Skills</h2>
-    <ul id="skills-list"></ul>
-  </div>
-</section>
+<!-- QA ENGINEERING SECTION -->
+<section class="craft" id="craft" aria-label="QA Engineering">
+  <div class="container">
+    <p class="eyebrow">7+ Years Experience</p>
+    <h2 class="display-title">QA Engineering</h2>
+    <p class="craft__about" id="about-text"></p>
 
-<section class="projects section-panel">
-  <div class="section-panel__inner">
-    <h2>Featured Projects</h2>
-    <div class="project-card">
-      <h3>AI-Powered QA Automation Suite</h3>
-      <p>Integrated JIRA, QASE & OpenAI to reduce manual QA effort by 70%+</p>
+    <div class="craft__skills-block">
+      <p class="block-label">Skills</p>
+      <ul class="craft__skills" id="skills-list"></ul>
     </div>
 
-    <div class="project-card">
-      <h3>Playwright Hybrid Framework</h3>
-      <p>End-to-end UI + API automation improving regression efficiency</p>
-    </div>
+    <div class="craft__projects-block">
+      <p class="block-label">Projects</p>
+      <div class="qa-grid">
+        <div class="qa-card">
+          <h3 class="qa-card__title">AI-Powered QA Suite</h3>
+          <p class="qa-card__desc">Integrated JIRA, QASE &amp; OpenAI to reduce manual QA effort by 70%+. Intelligent test case generation from requirements.</p>
+          <div class="qa-card__tags">
+            <span class="mono-tag mono-tag--sm">OpenAI</span>
+            <span class="mono-tag mono-tag--sm">JIRA</span>
+            <span class="mono-tag mono-tag--sm">QASE</span>
+          </div>
+        </div>
+        <div class="qa-card">
+          <h3 class="qa-card__title">Playwright Hybrid Framework</h3>
+          <p class="qa-card__desc">End-to-end UI + API automation framework improving regression efficiency. Custom reporters, parallel execution, and full CI integration.</p>
+          <div class="qa-card__tags">
+            <span class="mono-tag mono-tag--sm">Playwright</span>
+            <span class="mono-tag mono-tag--sm">JavaScript</span>
+            <span class="mono-tag mono-tag--sm">CI/CD</span>
+          </div>
+        </div>
+        <div class="qa-card">
+          <h3 class="qa-card__title">Test Case Mapping Tool</h3>
+          <p class="qa-card__desc">Reduced duplicate test cases by 60% using NLP-powered similarity scoring. Maps across test suites to surface redundancy before it ships.</p>
+          <div class="qa-card__tags">
+            <span class="mono-tag mono-tag--sm">NLP</span>
+            <span class="mono-tag mono-tag--sm">Python</span>
+            <span class="mono-tag mono-tag--sm">Similarity Scoring</span>
+          </div>
+        </div>
+      </div>
 
-    <div class="project-card">
-      <h3>Test Case Mapping Tool</h3>
-      <p>Reduced duplicate test cases by 60% using intelligent mapping</p>
-    </div>
-
-    <div class="project-snippets">
-      <h3 class="project-snippets__title">Project snippets</h3>
-      <div class="project-snippets__grid">
-        <figure class="project-snippet">
-          <img
-            src="TCM.png"
-            loading="lazy"
-            decoding="async"
-            alt="Everstream TCM Tool: search and suggested test cases with similarity scores"
-          >
+      <div class="qa-shots">
+        <figure class="qa-shot">
+          <img src="TCM.png" loading="lazy" decoding="async"
+               alt="Everstream TCM Tool — search interface with test case similarity scores">
           <figcaption>Everstream TCM Tool</figcaption>
         </figure>
-        <figure class="project-snippet">
-          <img
-            src="bugGEn.png"
-            loading="lazy"
-            decoding="async"
-            alt="Bug Report Generator: issue fields and generated bug report output"
-          >
+        <figure class="qa-shot">
+          <img src="bugGEn.png" loading="lazy" decoding="async"
+               alt="Bug Report Generator — AI-generated bug report output">
           <figcaption>Bug Report Generator</figcaption>
         </figure>
       </div>
@@ -86,25 +299,32 @@
   </div>
 </section>
 
-<section class="contact section-panel" id="contact">
-  <div class="section-panel__inner">
-    <h2>Contact</h2>
-    <p class="contact__links">
-      <a
-        href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=Pramodkhot2026@gmail.com"
-        target="_blank"
-        rel="noopener noreferrer"
-      >Email on Gmail</a>
-      <span class="contact__sep" aria-hidden="true"> · </span>
-      <a href="tel:+917620963525">7620963525</a>
-    </p>
+<!-- CONTACT -->
+<section class="contact" id="contact" aria-label="Contact">
+  <div class="container">
+    <h2 class="display-title">Get in touch</h2>
+    <p class="contact__sub">For QA opportunities, KathaKar partnerships, or just to say hello.</p>
+    <div class="contact__row">
+      <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=Pramodkhot2026@gmail.com"
+         target="_blank" rel="noopener noreferrer" class="contact__link">
+        Pramodkhot2026@gmail.com
+      </a>
+      <span class="contact__dot" aria-hidden="true">·</span>
+      <a href="tel:+917620963525" class="contact__link">+91 76209 63525</a>
+    </div>
+    <div class="contact__apps">
+      <a href="https://play.google.com/store/apps/details?id=com.pramodkhot.kathakar"
+         target="_blank" rel="noopener noreferrer" class="contact__app-link">
+        KathaKar on Play Store
+      </a>
+      <span class="contact__dot" aria-hidden="true">·</span>
+      <a href="https://whatsapp.com/channel/0029Vb7g1mf4SpkJRLVfcO1n"
+         target="_blank" rel="noopener noreferrer" class="contact__app-link">
+        WhatsApp Channel
+      </a>
+    </div>
   </div>
 </section>
-
-<button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to night mode" title="Day / night">
-  <span class="theme-toggle__icon" aria-hidden="true">☀</span>
-  <span class="theme-toggle__label">Night</span>
-</button>
 
 <script src="script.js"></script>
 </body>
