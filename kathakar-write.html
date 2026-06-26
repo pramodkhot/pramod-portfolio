@@ -934,9 +934,9 @@
     try {
       const snap = await db.collection('stories')
         .where('authorId', '==', currentUser.uid)
-        .orderBy('updatedAt', 'desc')
         .get();
-      const stories = snap.docs.map(d => d.data());
+      const stories = snap.docs.map(d => d.data())
+        .sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0));
       document.getElementById('stories-count-badge').textContent = stories.length ? `(${stories.length})` : '';
       if (stories.length === 0) {
         list.innerHTML = '<div class="stories-empty"><div style="font-size:48px">📖</div><p>No stories yet. Click "Write New Story" to start.</p></div>';
