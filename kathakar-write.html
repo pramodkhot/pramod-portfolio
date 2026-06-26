@@ -995,9 +995,9 @@
     try {
       const snap = await db.collection('episodes')
         .where('storyId', '==', storyId)
-        .orderBy('chapterNumber', 'asc')
         .get();
-      const eps = snap.docs.map(d => d.data());
+      const eps = snap.docs.map(d => d.data())
+        .sort((a, b) => (a.chapterNumber || 0) - (b.chapterNumber || 0));
       if (eps.length === 0) {
         container.innerHTML = '<div class="chapters-empty">No chapters yet.</div>';
         return;
