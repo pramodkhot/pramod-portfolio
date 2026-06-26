@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Publish Your Story — KathaKar</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -131,6 +132,17 @@
     .cover-preview { position: relative; }
     .cover-preview img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; }
     .cover-remove { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; color: #fff; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; }
+
+  /* ── Back button ── */
+  .back-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 24px; transition: color .2s; }
+  .back-btn:hover { color: var(--text); }
+
+  /* ── File upload for chapter ── */
+  .file-upload-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .file-upload-label { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--surface2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 12px; color: var(--muted); cursor: pointer; transition: border-color .2s, color .2s; }
+  .file-upload-label:hover { border-color: var(--orange); color: var(--orange); }
+  .file-upload-label input { display: none; }
+  .file-upload-hint { font-size: 11px; color: var(--muted); }
 
     /* ── Word count ── */
     .ep-meta { display: flex; gap: 16px; margin-top: 8px; }
@@ -323,6 +335,7 @@
 
     <!-- Step 2: Episodes -->
     <div id="step-episodes" style="display:none">
+      <button class="back-btn" onclick="goBackToStory()">← Back to Story Details</button>
       <div class="section-head">
         <h2 id="episodes-heading">Add Episodes</h2>
         <p id="episodes-sub">Chapter 1 is always free. Subsequent chapters can be unlocked with coins.</p>
@@ -339,7 +352,14 @@
         </div>
         <div class="form-group">
           <label>Content *</label>
-          <textarea id="ep-content" placeholder="Start writing your chapter here..." oninput="updateWordCount()"></textarea>
+          <div class="file-upload-row">
+            <label class="file-upload-label">
+              📄 Upload from file
+              <input type="file" accept=".txt,.docx" onchange="loadChapterFile(event)">
+            </label>
+            <span class="file-upload-hint">.txt or .docx — content will load into the editor below</span>
+          </div>
+          <textarea id="ep-content" placeholder="Start writing your chapter here, or upload a .txt file above..." oninput="updateWordCount()"></textarea>
           <div class="ep-meta">
             <span><strong id="word-count">0</strong> words</span>
             <span>~<strong id="read-time">0</strong> min read</span>
@@ -692,6 +712,59 @@
       toast('Failed to publish: ' + e.message, 'error');
       btn.disabled = false;
       btn.innerHTML = '🚀 Publish Story';
+    }
+  }
+
+  // ── Back to story details ─────────────────────────────────────────────────────
+  function goBackToStory() {
+    document.getElementById('step-episodes').style.display = 'none';
+    document.getElementById('step-story').style.display = 'block';
+    // Reset step 1 indicator to active
+    const s1 = document.getElementById('step-1-indicator');
+    s1.classList.remove('done');
+    s1.classList.add('active');
+    s1.querySelector('.step-num').textContent = '1';
+    const s2 = document.getElementById('step-2-indicator');
+    s2.classList.remove('active');
+    s2.querySelector('.step-num').textContent = '2';
+  }
+
+  // ── Load chapter from file (.txt or .docx) ───────────────────────────────────
+  function loadChapterFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast('File must be under 10MB', 'error'); return; }
+    e.target.value = '';
+
+    const name = file.name.toLowerCase();
+
+    if (name.endsWith('.docx')) {
+      // Use mammoth.js to extract plain text from .docx (same approach as Android FileUtils)
+      const reader = new FileReader();
+      reader.onload = ev => {
+        mammoth.extractRawText({ arrayBuffer: ev.target.result })
+          .then(result => {
+            const text = result.value.trim();
+            if (!text) { toast('Could not extract text from .docx', 'error'); return; }
+            document.getElementById('ep-content').value = text;
+            updateWordCount();
+            toast('Word document loaded — review before publishing', 'success');
+          })
+          .catch(() => toast('Failed to read .docx file', 'error'));
+      };
+      reader.onerror = () => toast('Could not read file', 'error');
+      reader.readAsArrayBuffer(file);
+
+    } else {
+      // Plain text / .txt
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.getElementById('ep-content').value = ev.target.result.trim();
+        updateWordCount();
+        toast('File loaded — review content before publishing', 'success');
+      };
+      reader.onerror = () => toast('Could not read file', 'error');
+      reader.readAsText(file, 'UTF-8');
     }
   }
 
