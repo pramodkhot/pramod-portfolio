@@ -431,8 +431,8 @@ table.ch-table {
             <div class="panel-pills" id="panel-pills"></div>
           </div>
           <div class="panel-actions">
-            <a class="btn-ghost" id="edit-story-btn" data-testid="edit-story-btn" href="#">⚙ Edit Story</a>
-            <a class="btn-primary-sm" id="add-chapter-btn" data-testid="add-chapter-btn" href="#">+ Add Chapter</a>
+            <a class="btn-ghost" id="edit-story-btn" data-testid="edit-story-btn" href="#" onclick="goToEditStory(event)">⚙ Edit Story</a>
+            <a class="btn-primary-sm" id="add-chapter-btn" data-testid="add-chapter-btn" href="#" onclick="goToAddChapter(event)">+ Add Chapter</a>
           </div>
         </div>
         <div class="panel-row2">
@@ -897,6 +897,20 @@ function escAttr(str) {
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 var toastTimer;
+function goToEditStory(event) {
+  event.preventDefault();
+  if (!selectedStoryId) { showToast('Select a story first', 'error'); return; }
+  window.location.href = 'kathakar-edit-story.html?storyId=' + encodeURIComponent(selectedStoryId);
+}
+
+function goToAddChapter(event) {
+  event.preventDefault();
+  if (!selectedStoryId) { showToast('Select a story first', 'error'); return; }
+  var story = stories.find(function(s) { return s.id === selectedStoryId; });
+  var nextNum = story ? (story.totalEpisodes || 0) + 1 : 1;
+  window.location.href = 'kathakar-add-chapter.html?storyId=' + encodeURIComponent(selectedStoryId) + '&chapterNum=' + nextNum;
+}
+
 function showToast(msg, type) {
   type = type || 'info';
   var el = document.getElementById('toast');
