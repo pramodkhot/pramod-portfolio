@@ -10,10 +10,26 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 :root {
+  /* Light mode (default) */
   --orange:      #E8500A;
   --orange-hi:   #FF6020;
-  --orange-dim:  rgba(232,80,10,0.12);
-  --orange-dim2: rgba(232,80,10,0.22);
+  --orange-dim:  rgba(232,80,10,0.10);
+  --orange-dim2: rgba(232,80,10,0.20);
+  --dark:        #F5F2EE;
+  --surface:     #FFFFFF;
+  --surface2:    #F0EDE8;
+  --surface3:    #E8E4DF;
+  --text:        #1C1924;
+  --muted:       #6E697C;
+  --subtle:      #A8A2B5;
+  --border:      rgba(0,0,0,0.07);
+  --border-hi:   rgba(0,0,0,0.13);
+  --green:       #2E7D32;
+  --green-dim:   rgba(46,125,50,0.11);
+  --red:         #C62828;
+  --red-dim:     rgba(198,40,40,0.09);
+}
+[data-theme="dark"] {
   --dark:        #0E0E12;
   --surface:     #17171C;
   --surface2:    #1F1F28;
@@ -44,7 +60,7 @@ body {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 20px; height: 56px;
-  background: rgba(14,14,18,0.97); backdrop-filter: blur(16px);
+  background: var(--surface); backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
 .topbar-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
@@ -66,7 +82,7 @@ body {
 
 /* ── Auth screen ── */
 #auth-screen {
-  min-height: 100vh; display: flex; flex-direction: column;
+  min-height: 100vh; display: none; flex-direction: column;
   align-items: center; justify-content: center;
   background: var(--dark); text-align: center; padding: 40px 24px;
 }
@@ -230,6 +246,15 @@ body {
 #toast[data-toast-type="success"] { border-color: var(--green); color: var(--green); }
 #toast[data-toast-type="error"]   { border-color: var(--red);   color: var(--red);   }
 #toast[data-toast-type="info"]    { border-color: var(--orange); color: var(--orange); }
+
+  .theme-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: 1px solid var(--border-hi);
+    border-radius: 6px; cursor: pointer; font-size: 16px;
+    color: var(--muted); transition: background .15s, color .15s;
+  }
+  .theme-btn:hover { background: var(--surface2); color: var(--text); }
 </style>
 </head>
 <body>
@@ -244,6 +269,7 @@ body {
     <img class="user-avatar" id="user-avatar" src="" alt="avatar">
     <span class="user-name" id="user-name-topbar"></span>
     <button class="sign-out-btn" onclick="doSignOut()">Sign out</button>
+    <button id="theme-btn" class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
   </div>
 </header>
 

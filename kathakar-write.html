@@ -10,10 +10,26 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 :root {
+  /* Light mode (default) */
   --orange:      #E8500A;
   --orange-hi:   #FF6020;
-  --orange-dim:  rgba(232,80,10,0.12);
-  --orange-dim2: rgba(232,80,10,0.22);
+  --orange-dim:  rgba(232,80,10,0.10);
+  --orange-dim2: rgba(232,80,10,0.20);
+  --dark:        #F5F2EE;
+  --surface:     #FFFFFF;
+  --surface2:    #F0EDE8;
+  --surface3:    #E8E4DF;
+  --text:        #1C1924;
+  --muted:       #6E697C;
+  --subtle:      #A8A2B5;
+  --border:      rgba(0,0,0,0.07);
+  --border-hi:   rgba(0,0,0,0.13);
+  --green:       #2E7D32;
+  --green-dim:   rgba(46,125,50,0.11);
+  --red:         #C62828;
+  --red-dim:     rgba(198,40,40,0.09);
+}
+[data-theme="dark"] {
   --dark:        #0E0E12;
   --surface:     #17171C;
   --surface2:    #1F1F28;
@@ -43,7 +59,7 @@ body {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 20px; height: 56px;
-  background: rgba(14,14,18,0.97); backdrop-filter: blur(16px);
+  background: var(--surface); backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
 .topbar-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
@@ -66,7 +82,7 @@ body {
 /* ── Auth screen ── */
 #auth-screen {
   position: fixed; inset: 0; z-index: 1000;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: none; flex-direction: column; align-items: center; justify-content: center;
   background: var(--dark); text-align: center; padding: 40px 24px;
 }
 .auth-logo-box {
@@ -105,20 +121,6 @@ body {
   border-right: 1px solid var(--border);
   overflow: hidden;
 }
-.sidebar-brand {
-  display: flex; align-items: center; gap: 10px;
-  padding: 16px 14px 14px;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.brand-k {
-  width: 32px; height: 32px; border-radius: 8px; background: var(--orange);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 800; color: #fff; font-style: italic; flex-shrink: 0;
-}
-.brand-text-wrap { display: flex; flex-direction: column; }
-.brand-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
-.brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--subtle); margin-top: 1px; }
 .sidebar-stories-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 14px 10px;
@@ -169,7 +171,7 @@ body {
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
 }
 .pill-pub  { background: var(--green-dim); color: var(--green); }
-.pill-draft { background: rgba(255,255,255,0.07); color: var(--muted); }
+.pill-draft { background: var(--surface3); color: var(--muted); }
 .pill-lang  { background: var(--orange-dim); color: var(--orange); }
 .sidebar-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 13px; line-height: 1.6; }
 
@@ -300,7 +302,7 @@ table.ch-table {
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
 }
 .chip-pub   { background: var(--green-dim); color: var(--green); }
-.chip-draft { background: rgba(255,255,255,0.07); color: var(--muted); }
+.chip-draft { background: var(--surface3); color: var(--muted); }
 .ch-date { font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .ch-words { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .actions-cell { display: flex; align-items: center; gap: 5px; }
@@ -357,6 +359,15 @@ table.ch-table {
   .panel-topbar { padding: 12px 14px 10px; }
   .table-section { padding: 14px 14px 24px; }
 }
+
+  .theme-btn {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: 1px solid var(--border-hi);
+    border-radius: 6px; cursor: pointer; font-size: 16px;
+    color: var(--muted); transition: background .15s, color .15s;
+  }
+  .theme-btn:hover { background: var(--surface2); color: var(--text); }
 </style>
 </head>
 <body>
@@ -371,6 +382,7 @@ table.ch-table {
     <img class="user-avatar" id="user-avatar" src="" alt="avatar">
     <span class="user-name" id="user-name-topbar"></span>
     <button class="sign-out-btn" onclick="doSignOut()">Sign out</button>
+    <button id="theme-btn" class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
   </div>
 </header>
 
@@ -395,13 +407,6 @@ table.ch-table {
 
   <!-- Sidebar -->
   <aside class="sidebar" data-testid="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-k">K</div>
-      <div class="brand-text-wrap">
-        <span class="brand-name">KathaKar</span>
-        <span class="brand-sub">Writer Studio</span>
-      </div>
-    </div>
     <div class="sidebar-stories-head">
       <span class="sidebar-label">My Stories (<span id="stories-count">0</span>)</span>
       <a class="new-story-btn" href="kathakar-edit-story.html" data-testid="new-story-btn">+ New</a>
