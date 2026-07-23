@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KathaKar — Read</title>
+
+  <!-- Social / OG — updated dynamically by JS after story loads -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="KathaKar">
+  <meta property="og:title" content="Read on KathaKar">
+  <meta property="og:description" content="Multilingual stories and poems in 9 Indian languages.">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    /* ── Tokens ────────────────────────────────────────────────── */
+    :root {
+      --ground:   #1C1C1E;
+      --surface:  #242426;
+      --raised:   #2C2C2E;
+      --text:     #E8E0D0;
+      --dim:      #9A9490;
+      --accent:   #FF6B35;
+      --warm:     #FFB347;
+      --rule:     rgba(255,255,255,0.08);
+      --r-width:  660px;
+      --ui:       -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --serif:    Georgia,'Times New Roman',serif;
+    }
+    [data-theme="light"] {
+      --ground: #F7F2E8;
+      --surface: #EDE7D9;
+      --raised:  #E3DDD0;
+      --text:    #2C2416;
+      --dim:     #6B6358;
+      --rule:    rgba(0,0,0,0.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--ground);
+      color: var(--text);
+      font-family: var(--ui);
+      min-height: 100vh;
+      transition: background .25s, color .25s;
+    }
+
+    /* ── Loading ───────────────────────────────────────────────── */
+    #loading {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100vh; gap: 16px;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--rule);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; opacity: .5; } }
+
+    /* ── Error ─────────────────────────────────────────────────── */
+    #error-view {
+      display: none; text-align: center;
+      padding: 80px 24px; max-width: 400px; margin: 0 auto;
+    }
+    .error-icon { font-size: 40px; margin-bottom: 16px; }
+    .error-title { font-size: 22px; margin-bottom: 10px; font-family: var(--serif); }
+    .error-msg { font-size: 15px; color: var(--dim); line-height: 1.6; }
+    .back-link { display: inline-block; margin-top: 24px; color: var(--accent); font-size: 14px; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+
+    /* ── Theme toggle ──────────────────────────────────────────── */
+    #theme-btn {
+      position: fixed; top: 14px; right: 14px; z-index: 200;
+      background: var(--raised); border: none; border-radius: 20px;
+      padding: 6px 12px; color: var(--dim); font-size: 12px;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      letter-spacing: .04em;
+    }
+    #theme-btn:hover { opacity: .8; }
+
+    /* ── Hero ──────────────────────────────────────────────────── */
+    #hero {
+      display: none; position: relative;
+      width: 100%; min-height: 240px; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #200800 0%, #2d1200 60%, var(--ground) 100%);
+    }
+    #hero-cover {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: .2;
+    }
+    .hero-fade {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 30%, var(--ground) 100%);
+    }
+    .hero-inner {
+      position: relative; z-index: 2;
+      max-width: var(--r-width);
+      margin: 0 auto; padding: 44px 24px 36px;
+    }
+    .logo-link {
+      font-size: 12px; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--accent); text-decoration: none;
+    }
+    .hero-genre {
+      margin-top: 8px; font-size: 12px; color: var(--dim);
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .hero-story-title {
+      font-family: var(--serif);
+      font-size: clamp(22px,5vw,32px);
+      font-weight: normal; line-height: 1.2;
+      color: #fff; margin-top: 10px;
+    }
+    .hero-author { font-size: 14px; color: rgba(255,255,255,.55); margin-top: 6px; }
+    .hero-author span { color: rgba(255,255,255,.85); }
+
+    /* ── Reading area ──────────────────────────────────────────── */
+    #reading {
+      display: none;
+      max-width: var(--r-width);
+      margin: 0 auto;
+      padding: 36px 24px 160px;
+    }
+
+    .ch-meta {
+      display: flex; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 28px; padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .ch-chip {
+      font-size: 12px; color: var(--dim);
+      letter-spacing: .04em;
+    }
+    .ch-chip.num { color: var(--accent); font-weight: 600; }
+
+    .ch-title {
+      font-family: var(--serif);
+      font-size: clamp(26px,5.5vw,38px);
+      font-weight: normal; line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .ch-byline { font-size: 14px; color: var(--dim); margin-bottom: 36px; }
+
+    /* ── Prose ─────────────────────────────────────────────────── */
+    #prose {
+      font-family: var(--serif);
+      font-size: 1.06rem; line-height: 1.88;
+      color: var(--text);
+    }
+    #prose p { margin-bottom: 1.4em; text-indent: 1.5em; }
+    #prose p:first-child { text-indent: 0; }
+    #prose p:first-child::first-letter {
+      font-size: 3.6em; line-height: .78;
+      float: left; margin-right: 8px; margin-top: 6px;
+      color: var(--accent); font-family: Georgia, serif;
+    }
+    #prose h2, #prose h3 {
+      font-family: var(--serif); font-weight: normal;
+      margin: 2em 0 .6em; color: var(--text);
+    }
+
+    /* ── End-of-chapter ────────────────────────────────────────── */
+    #end-cta {
+      display: none;
+      margin-top: 64px; padding-top: 48px;
+      border-top: 2px solid var(--accent);
+      text-align: center;
+    }
+    .end-ornament { font-size: 28px; margin-bottom: 20px; letter-spacing: .3em; color: var(--dim); }
+    .end-heading {
+      font-family: var(--serif); font-size: 24px;
+      font-weight: normal; margin-bottom: 10px;
+    }
+    .end-sub {
+      font-size: 15px; color: var(--dim); line-height: 1.6;
+      max-width: 380px; margin: 0 auto 32px;
+    }
+
+    /* next chapter preview card */
+    #next-card {
+      display: none; background: var(--surface);
+      border-radius: 14px; padding: 18px 20px;
+      margin-bottom: 28px; text-align: left;
+    }
+    .next-label {
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--accent); margin-bottom: 6px;
+    }
+    .next-title { font-family: var(--serif); font-size: 17px; margin-bottom: 4px; }
+    .next-locked { font-size: 13px; color: var(--dim); }
+
+    /* CTA buttons */
+    .btn-wrap { max-width: 340px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 14px;
+      padding: 16px 28px; font-size: 16px; font-weight: 600;
+      cursor: pointer; text-decoration: none;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn-primary:hover { opacity: .92; transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-secondary {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--raised); color: var(--text);
+      border: 1px solid var(--rule); border-radius: 14px;
+      padding: 14px 24px; font-size: 15px;
+      cursor: pointer; text-decoration: none;
+      transition: background .2s;
+    }
+    .btn-secondary:hover { background: var(--surface); }
+
+    .btn-ghost {
+      background: none; border: none; color: var(--dim);
+      font-size: 14px; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 3px;
+      padding: 8px 0;
+    }
+
+    /* ── Sticky bar ────────────────────────────────────────────── */
+    #sticky {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--rule);
+      padding: 12px 20px max(20px, env(safe-area-inset-bottom));
+      z-index: 100;
+      align-items: center; gap: 12px;
+      transform: translateY(110%);
+      transition: transform .3s ease;
+    }
+    #sticky.shown { transform: translateY(0); }
+    .sticky-text { flex: 1; overflow: hidden; }
+    .sticky-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+    .sticky-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sticky-btn {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 10px;
+      padding: 10px 18px; font-size: 14px; font-weight: 600;
+      cursor: pointer; text-decoration: none; white-space: nowrap;
+    }
+
+    /* ── Responsive ────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      #reading { padding: 28px 20px 140px; }
+      .hero-inner { padding: 36px 20px 28px; }
+      #prose { font-size: .98rem; }
+      #prose p:first-child::first-letter { font-size: 3em; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Theme toggle -->
+<button id="theme-btn" onclick="toggleTheme()">
+  <span id="theme-icon">☀</span> <span id="theme-lbl">Light</span>
+</button>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p style="color:var(--dim);font-size:14px;">Loading story…</p>
+</div>
+
+<!-- Error -->
+<div id="error-view">
+  <div class="error-icon">📚</div>
+  <h2 class="error-title" id="error-title">Story not found</h2>
+  <p class="error-msg" id="error-msg">This story may have been removed or the link may be broken.</p>
+  <a class="back-link" href="kathakar.html">← Back to KathaKar</a>
+</div>
+
+<!-- Story hero -->
+<div id="hero">
+  <div class="hero-bg"></div>
+  <img id="hero-cover" src="" alt="">
+  <div class="hero-fade"></div>
+  <div class="hero-inner">
+    <a href="kathakar.html" class="logo-link">KathaKar</a>
+    <div class="hero-genre" id="hero-genre"></div>
+    <h1 class="hero-story-title" id="hero-story-title"></h1>
+    <p class="hero-author" id="hero-author"></p>
+  </div>
+</div>
+
+<!-- Reading area -->
+<div id="reading">
+  <div class="ch-meta">
+    <span class="ch-chip num" id="chip-chapter"></span>
+    <span class="ch-chip" id="chip-time"></span>
+    <span class="ch-chip" id="chip-lang"></span>
+  </div>
+
+  <h2 class="ch-title" id="ch-title"></h2>
+  <p class="ch-byline" id="ch-byline"></p>
+
+  <div id="prose"></div>
+
+  <!-- End-of-chapter CTA block -->
+  <div id="end-cta">
+    <div class="end-ornament">✦ ✦ ✦</div>
+    <h3 class="end-heading" id="end-heading">Ready for more?</h3>
+    <p class="end-sub" id="end-sub">Continue the story on KathaKar — free on the Play Store.</p>
+
+    <div id="next-card">
+      <div class="next-label">Next Chapter</div>
+      <div class="next-title" id="next-title"></div>
+      <div class="next-locked">🔒 Available free in the KathaKar app</div>
+    </div>
+
+    <div class="btn-wrap">
+      <a id="btn-download" class="btn-primary" href="https://play.google.com/store/apps/details?id=com.pramodkhot.kathakar" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M8 12l4 4 4-4M12 8v8"/></svg>
+        Download KathaKar — Free
+      </a>
+      <a id="btn-open-app" class="btn-secondary" href="" style="display:none">
+        📱 Open in KathaKar App
+      </a>
+      <button class="btn-ghost" onclick="shareChapter()">📤 Share this chapter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sticky bar -->
+<div id="sticky">
+  <div class="sticky-text">
+    <div class="sticky-label">Continue reading</div>
+    <div class="sticky-title" id="sticky-title">in the KathaKar app</div>
+  </div>
+  <a id="sticky-btn" class="sticky-btn" href="https://play.google.com/store/apps/details?id=com.pramodkhot.kathakar" target="_blank" rel="noopener">Get App</a>
+</div>
+
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  firebase.initializeApp({
+    apiKey:            "AIzaSyAlBgMkCbsOSqVAj3kcr8WeYCLcagK4B7U",
+    authDomain:        "kathakar-8b43a.firebaseapp.com",
+    projectId:         "kathakar-8b43a",
+    storageBucket:     "kathakar-8b43a.firebasestorage.app",
+    messagingSenderId: "843855541873",
+    appId:             "1:843855541873:web:230f1720020e0057ed4dd0"
+  });
+
+  const db = firebase.firestore();
+  const PLAY_STORE = 'https://play.google.com/store/apps/details?id=com.pramodkhot.kathakar';
+
+  const params     = new URLSearchParams(location.search);
+  const storyId    = params.get('story');
+  const episodeId  = params.get('episode');
+  const isAndroid  = /android/i.test(navigator.userAgent);
+
+  let story = null, episode = null, allEps = [];
+
+  // ── Init ─────────────────────────────────────────────────────
+  async function init() {
+    if (!storyId) { showError('No story link', 'Use a KathaKar share link to open a story.'); return; }
+
+    try {
+      // Fetch story
+      const sdoc = await db.collection('stories').doc(storyId).get();
+      if (!sdoc.exists || sdoc.data().status !== 'PUBLISHED') {
+        showError('Story not available', 'This story may have been removed or is not yet published.');
+        return;
+      }
+      story = { id: sdoc.id, ...sdoc.data() };
+
+      // Fetch all published episodes for this story (no orderBy to avoid composite index)
+      const epSnap = await db.collection('episodes')
+        .where('storyId', '==', storyId)
+        .where('status', '==', 'PUBLISHED')
+        .get();
+
+      allEps = epSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (a.chapterNumber || 0) - (b.chapterNumber || 0));
+
+      if (allEps.length === 0) {
+        showError('No chapters yet', 'This story has no published chapters yet. Check back soon!');
+        return;
+      }
+
+      // Resolve which episode to show — prefer the shared episode, fallback to ch 1
+      if (episodeId) {
+        episode = allEps.find(e => e.episodeId === episodeId || e.id === episodeId) || allEps[0];
+      } else {
+        episode = allEps[0];
+      }
+
+      render();
+    } catch (e) {
+      console.error(e);
+      if (e.code === 'permission-denied') {
+        showError(
+          'Reading not available',
+          'Public reading is not yet enabled for this story. The author needs to update Firestore rules.'
+        );
+      } else {
+        showError('Failed to load', e.message || 'Please try again later.');
+      }
+    }
+  }
+
+  // ── Render ───────────────────────────────────────────────────
+  function render() {
+    const ep = episode;
+
+    // Hero
+    document.getElementById('hero-genre').textContent =
+      (story.genres || story.category ? [].concat(story.genres || [], story.category ? [story.category] : []).join(' · ') : '');
+    document.getElementById('hero-story-title').textContent = story.title || '';
+    document.getElementById('hero-author').innerHTML =
+      `by <span>${esc(story.authorName || 'Unknown')}</span>`;
+
+    if (story.coverImageUrl || story.coverUrl) {
+      const img = document.getElementById('hero-cover');
+      img.src = story.coverImageUrl || story.coverUrl;
+      img.alt = story.title;
+    }
+
+    // Update page title & OG tags
+    const pageTitle = `${ep.title || 'Chapter ' + ep.chapterNumber} — ${story.title} · KathaKar`;
+    document.title = pageTitle;
+    setMeta('og:title', pageTitle);
+    setMeta('og:description',
+      `Chapter ${ep.chapterNumber} of "${story.title}" by ${story.authorName}. Read free on KathaKar.`);
+    if (story.coverImageUrl || story.coverUrl)
+      setMeta('og:image', story.coverImageUrl || story.coverUrl);
+
+    // Chapter meta chips
+    set('chip-chapter', `Chapter ${ep.chapterNumber}`);
+    set('chip-time',    ep.readTimeMinutes ? `${ep.readTimeMinutes} min read` : '');
+    set('chip-lang',    story.language || '');
+
+    // Chapter heading
+    set('ch-title',  ep.title || `Chapter ${ep.chapterNumber}`);
+    set('ch-byline', `${story.title} · by ${story.authorName}`);
+
+    // Prose content — split on blank lines → paragraphs
+    const raw = ep.content || '';
+    document.getElementById('prose').innerHTML = raw
+      .split(/\n{2,}/)
+      .filter(p => p.trim())
+      .map(p => `<p>${esc(p.trim()).replace(/\n/g, '<br>')}</p>`)
+      .join('');
+
+    // End-of-chapter CTA
+    const nextEp = allEps.find(e => (e.chapterNumber || 0) === (ep.chapterNumber || 0) + 1);
+    setupEndCTA(nextEp);
+
+    // Open-in-app (Android intent URI)
+    if (isAndroid) {
+      const fallback = encodeURIComponent(PLAY_STORE);
+      const intent = `intent://story/${storyId}#Intent;scheme=kathakar;package=com.pramodkhot.kathakar;S.browser_fallback_url=${fallback};end`;
+      const btn = document.getElementById('btn-open-app');
+      btn.href = intent;
+      btn.style.display = 'flex';
+    }
+
+    // Sticky bar
+    const sticky = document.getElementById('sticky');
+    const nextLabel = nextEp
+      ? `Chapter ${nextEp.chapterNumber}: ${nextEp.title}`
+      : story.title;
+    set('sticky-title', nextLabel);
+    sticky.style.display = 'flex';
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > window.innerHeight * 0.5) sticky.classList.add('shown');
+      else sticky.classList.remove('shown');
+    }, { passive: true });
+
+    // Show all sections
+    show('hero');
+    show('reading');
+    document.getElementById('end-cta').style.display = 'block';
+    hide('loading');
+  }
+
+  function setupEndCTA(nextEp) {
+    if (nextEp) {
+      set('end-heading', `Ready for Chapter ${nextEp.chapterNumber}?`);
+      set('end-sub',
+        `"${esc(nextEp.title)}" is waiting in the KathaKar app — free to download.`);
+      set('next-title', `Chapter ${nextEp.chapterNumber}: ${esc(nextEp.title)}`);
+      document.getElementById('next-card').style.display = 'block';
+    } else {
+      set('end-heading', 'Explore more stories');
+      set('end-sub',
+        'Discover hundreds of stories and poems in 9 Indian languages on KathaKar — free on the Play Store.');
+    }
+  }
+
+  // ── Share ────────────────────────────────────────────────────
+  function shareChapter() {
+    const url  = location.href;
+    const text = episode
+      ? `📖 Read "${story.title}" — Chapter ${episode.chapterNumber} on KathaKar`
+      : `📖 Read "${story.title}" on KathaKar`;
+    if (navigator.share) {
+      navigator.share({ title: text, url }).catch(() => copyUrl(url));
+    } else {
+      copyUrl(url);
+    }
+  }
+
+  function copyUrl(url) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url)
+        .then(() => toast('Link copied!'))
+        .catch(() => prompt('Copy this link:', url));
+    } else {
+      prompt('Copy this link:', url);
+    }
+  }
+
+  function toast(msg) {
+    const el = document.createElement('div');
+    el.textContent = msg;
+    Object.assign(el.style, {
+      position:'fixed', bottom:'90px', left:'50%',
+      transform:'translateX(-50%)',
+      background: 'var(--raised)', color: 'var(--text)',
+      padding:'10px 20px', borderRadius:'20px',
+      fontSize:'14px', zIndex:'999',
+      boxShadow: '0 4px 16px rgba(0,0,0,.4)',
+      transition: 'opacity .3s'
+    });
+    document.body.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2000);
+  }
+
+  // ── Theme ────────────────────────────────────────────────────
+  function initTheme() {
+    const saved = localStorage.getItem('kk-theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    applyTheme(theme);
+  }
+
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  }
+
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('kk-theme', t);
+    document.getElementById('theme-icon').textContent = t === 'dark' ? '☀' : '🌙';
+    document.getElementById('theme-lbl').textContent  = t === 'dark' ? 'Light' : 'Dark';
+  }
+
+  // ── Utils ────────────────────────────────────────────────────
+  function showError(title, msg) {
+    hide('loading');
+    document.getElementById('error-title').textContent = title;
+    document.getElementById('error-msg').textContent = msg || '';
+    show('error-view');
+  }
+
+  function setMeta(prop, content) {
+    let el = document.querySelector(`meta[property="${prop}"]`);
+    if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+    el.setAttribute('content', content);
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function set(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function show(id) { const el = document.getElementById(id); if (el) el.style.display = 'block'; }
+  function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+  initTheme();
+  init();
+</script>
+</body>
+</html>
