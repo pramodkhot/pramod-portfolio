@@ -497,6 +497,36 @@ table.ch-table {
 }
 .modal-confirm:hover { background: #b71c1c; }
 .modal-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Write with AI tab ── */
+.tab-ai-btn { color: var(--orange); font-style: italic; }
+.tab-ai-btn:hover { color: var(--orange-hi); }
+.tab-ai-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* ── Coming soon panel ── */
+.coming-soon-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 48px 24px; gap: 10px;
+}
+.coming-soon-glow {
+  font-size: 48px; color: var(--orange);
+  filter: drop-shadow(0 0 24px rgba(232,80,10,0.45));
+  margin-bottom: 6px; line-height: 1;
+}
+.coming-soon-title {
+  font-size: 22px; font-weight: 800; color: var(--text);
+  letter-spacing: -0.3px;
+}
+.coming-soon-sub {
+  display: inline-block; padding: 3px 12px; border-radius: 100px;
+  background: var(--orange-dim); color: var(--orange);
+  font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+}
+.coming-soon-desc {
+  font-size: 14px; color: var(--muted); line-height: 1.75;
+  max-width: 380px; margin-top: 4px;
+}
 </style>
 </head>
 <body>
@@ -574,6 +604,7 @@ table.ch-table {
           <button class="tab-btn active" data-tab="chapters" data-testid="tab-chapters" onclick="switchTab('chapters')">Chapters</button>
           <button class="tab-btn" data-tab="analytics" data-testid="tab-analytics" onclick="switchTab('analytics')">Analytics</button>
           <button class="tab-btn" data-tab="settings" data-testid="tab-settings" onclick="switchTab('settings')">Settings</button>
+          <button class="tab-btn tab-ai-btn" data-tab="ai" data-testid="tab-ai" onclick="switchTab('ai')">✦ Write with AI</button>
         </div>
       </div>
 
@@ -638,6 +669,20 @@ table.ch-table {
               <button class="btn-danger" data-testid="delete-story-btn" onclick="startDeleteStory()">Delete Story</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ── Tab: Write with AI ── -->
+      <div id="tab-ai" class="tab-panel" style="display:none">
+        <div class="coming-soon-wrap">
+          <div class="coming-soon-glow">✦</div>
+          <div class="coming-soon-title">Write with AI</div>
+          <div class="coming-soon-sub">Coming Soon</div>
+          <div class="coming-soon-desc">
+            AI-powered writing assistant is on the way.<br>
+            Generate new chapters, edit existing content, and continue your stories — all through conversation.
+          </div>
+          <button class="btn-ghost" style="margin-top:8px" onclick="switchTab('chapters')">← Back to Chapters</button>
         </div>
       </div>
 
@@ -1130,7 +1175,7 @@ function showToast(msg, type) {
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(name) {
-  ['chapters', 'analytics', 'settings'].forEach(function(t) {
+  ['chapters', 'analytics', 'settings', 'ai'].forEach(function(t) {
     var panel = document.getElementById('tab-' + t);
     var btn   = document.querySelector('[data-tab="' + t + '"]');
     if (panel) panel.style.display = t === name ? 'flex' : 'none';
