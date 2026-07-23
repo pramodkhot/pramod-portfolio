@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KathaKar — Writer Studio</title>
+<style>
+/* ── TOKENS ─────────────────────────────── */
+:root {
+  --bg:          #F5F1EB;
+  --surface:     #FFFFFF;
+  --surface-2:   #EDE9E2;
+  --surface-3:   #E2DDD5;
+  --text:        #1C1924;
+  --muted:       #6E697C;
+  --subtle:      #A8A2B5;
+  --accent:      #FF6B00;
+  --accent-hi:   #FF7D1A;
+  --accent-dim:  rgba(255,107,0,0.09);
+  --accent-dim2: rgba(255,107,0,0.17);
+  --border:      rgba(0,0,0,0.08);
+  --border-hi:   rgba(0,0,0,0.14);
+  --green:       #2E7D32;
+  --green-dim:   rgba(46,125,50,0.11);
+  --red:         #C62828;
+  --red-dim:     rgba(198,40,40,0.09);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
+  --sidebar:     272px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #0E0E12;
+    --surface:   #17171C;
+    --surface-2: #1F1F28;
+    --surface-3: #272733;
+    --text:      #F0EDE8;
+    --muted:     #8B8799;
+    --subtle:    #5A5768;
+    --border:    rgba(255,255,255,0.07);
+    --border-hi: rgba(255,255,255,0.13);
+    --green:     #4CAF50;
+    --green-dim: rgba(76,175,80,0.13);
+    --red:       #EF5350;
+    --red-dim:   rgba(239,83,80,0.12);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  }
+}
+:root[data-theme="light"] {
+  --bg:#F5F1EB; --surface:#FFFFFF; --surface-2:#EDE9E2; --surface-3:#E2DDD5;
+  --text:#1C1924; --muted:#6E697C; --subtle:#A8A2B5;
+  --border:rgba(0,0,0,0.08); --border-hi:rgba(0,0,0,0.14);
+  --green:#2E7D32; --green-dim:rgba(46,125,50,0.11);
+  --red:#C62828; --red-dim:rgba(198,40,40,0.09);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.10),0 1px 2px rgba(0,0,0,0.06);
+}
+:root[data-theme="dark"] {
+  --bg:#0E0E12; --surface:#17171C; --surface-2:#1F1F28; --surface-3:#272733;
+  --text:#F0EDE8; --muted:#8B8799; --subtle:#5A5768;
+  --border:rgba(255,255,255,0.07); --border-hi:rgba(255,255,255,0.13);
+  --green:#4CAF50; --green-dim:rgba(76,175,80,0.13);
+  --red:#EF5350; --red-dim:rgba(239,83,80,0.12);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* ── RESET ──────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0 }
+html,body { height:100%; overflow:hidden }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text);
+  font-size: 14px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color .25s, color .25s;
+}
+
+/* ── APP SHELL ──────────────────────────── */
+.app { display:flex; height:100vh }
+
+/* ── SIDEBAR ────────────────────────────── */
+.sidebar {
+  width: var(--sidebar); flex-shrink:0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display:flex; flex-direction:column; overflow:hidden;
+  transition: background .25s, border-color .25s;
+}
+.sidebar-logo {
+  display:flex; align-items:center; gap:10px;
+  padding:15px 16px 13px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.logo-box {
+  width:32px; height:32px; border-radius:8px; background:var(--accent);
+  color:#fff; font-size:17px; font-weight:900;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.logo-text { font-size:14px; font-weight:700; line-height:1.2 }
+.logo-sub  { font-size:10px; color:var(--muted); letter-spacing:.04em }
+.sidebar-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 16px 8px; flex-shrink:0;
+}
+.sidebar-label {
+  font-size:10px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--subtle);
+}
+.btn-new {
+  display:inline-flex; align-items:center; gap:3px;
+  padding:4px 10px; background:var(--accent); color:#fff;
+  border:none; border-radius:5px; font-size:11px; font-weight:700;
+  cursor:pointer; font-family:inherit; transition:background .15s;
+}
+.btn-new:hover { background:var(--accent-hi) }
+.story-list { flex:1; overflow-y:auto; padding:4px 0 }
+.story-item {
+  display:flex; align-items:center; gap:10px; padding:10px 16px;
+  cursor:pointer; border-left:3px solid transparent;
+  transition:background .12s, border-color .12s;
+}
+.story-item:hover  { background:var(--surface-2) }
+.story-item.active { background:var(--accent-dim); border-left-color:var(--accent) }
+.story-cover {
+  width:40px; height:52px; border-radius:6px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; font-weight:900; color:rgba(255,255,255,.85);
+}
+.story-info { min-width:0 }
+.story-name {
+  font-size:13px; font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text);
+}
+.story-item.active .story-name { color:var(--accent) }
+.story-meta  { font-size:11px; color:var(--muted); margin-top:2px }
+.story-pills { display:flex; gap:4px; margin-top:5px; flex-wrap:wrap }
+.badge {
+  display:inline-flex; align-items:center;
+  padding:2px 6px; border-radius:4px;
+  font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  font-variant-numeric:tabular-nums;
+}
+.b-pub   { background:var(--green-dim); color:var(--green) }
+.b-draft { background:var(--surface-3); color:var(--muted) }
+.b-lang  { background:var(--surface-3); color:var(--muted) }
+.b-genre { background:var(--surface-3); color:var(--muted) }
+.sidebar-foot { padding:12px 16px; border-top:1px solid var(--border); flex-shrink:0 }
+.btn-write {
+  width:100%; padding:9px;
+  background:var(--accent-dim); border:1.5px dashed rgba(255,107,0,.35);
+  color:var(--accent); border-radius:7px; font-size:12px; font-weight:600;
+  cursor:pointer; font-family:inherit; transition:background .15s;
+}
+.btn-write:hover { background:var(--accent-dim2) }
+
+/* ── MAIN ───────────────────────────────── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0 }
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; border-bottom:1px solid var(--border);
+  flex-shrink:0; height:48px; background:var(--surface);
+}
+.topbar-tabs { display:flex; height:100% }
+.tab {
+  display:flex; align-items:center; padding:0 16px;
+  font-size:13px; font-weight:500; color:var(--muted); cursor:pointer;
+  border-bottom:2px solid transparent; transition:color .15s, border-color .15s;
+}
+.tab:hover { color:var(--text) }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent) }
+.topbar-right { display:flex; align-items:center; gap:10px; color:var(--muted); font-size:13px }
+.theme-btn {
+  width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid var(--border-hi); border-radius:6px;
+  cursor:pointer; font-size:14px; color:var(--muted); transition:background .15s, color .15s;
+}
+.theme-btn:hover { background:var(--surface-2); color:var(--text) }
+.topbar-avatar { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#6B3FA0,#3B82C4) }
+.story-header {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  padding:16px 24px 14px; border-bottom:1px solid var(--border);
+  flex-shrink:0; gap:16px; background:var(--surface);
+}
+.story-title { font-size:20px; font-weight:700; letter-spacing:-.3px; margin-bottom:7px; text-wrap:balance }
+.story-badges { display:flex; gap:5px; flex-wrap:wrap; align-items:center }
+.story-actions { display:flex; gap:8px; align-items:center; flex-shrink:0; padding-top:2px }
+.btn {
+  display:inline-flex; align-items:center; gap:5px; padding:6px 13px; border-radius:6px;
+  font-size:12px; font-weight:600; cursor:pointer; font-family:inherit;
+  transition:all .14s; border:none; white-space:nowrap;
+}
+.btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px }
+.btn-ghost  { background:transparent; color:var(--muted); border:1px solid var(--border-hi) }
+.btn-ghost:hover { background:var(--surface-2); color:var(--text) }
+.btn-primary { background:var(--accent); color:#fff }
+.btn-primary:hover { background:var(--accent-hi) }
+.btn-primary:disabled { background:var(--surface-3); color:var(--muted); cursor:not-allowed }
+.btn-danger { background:transparent; color:var(--red); border:1px solid rgba(198,40,40,.2) }
+.btn-danger:hover { background:var(--red-dim) }
+
+/* ── CHAPTERS AREA ──────────────────────── */
+.chapters-area { flex:1; overflow-y:auto; padding:18px 24px 48px; background:var(--bg) }
+.ch-count {
+  font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--subtle); margin-bottom:12px;
+}
+.ch-table-wrap { overflow-x:auto }
+table { width:100%; border-collapse:collapse; table-layout:fixed }
+col.col-num     { width:52px }
+col.col-title   { width:auto }
+col.col-words   { width:110px }
+col.col-status  { width:100px }
+col.col-actions { width:160px }
+thead th {
+  text-align:left; font-size:10px; font-weight:700;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--subtle);
+  padding:0 10px 9px; border-bottom:1px solid var(--border); white-space:nowrap;
+}
+thead th:first-child { padding-left:0 }
+thead th.th-actions { text-align:right }
+tbody tr { border-bottom:1px solid var(--border); transition:background .11s }
+tbody tr:last-child  { border-bottom:none }
+tbody tr:hover       { background:var(--surface-2) }
+tbody tr.is-editing  { background:rgba(255,107,0,.06) }
+tbody tr.flash-saved { background:rgba(76,175,80,.09); transition:background .1s }
+td { padding:11px 10px; vertical-align:middle }
+td:first-child { padding-left:0 }
+.ch-num {
+  width:26px; height:26px; border-radius:6px; background:var(--accent);
+  color:#fff; font-size:11px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+  font-variant-numeric:tabular-nums;
+}
+.ch-title-text {
+  display:inline-block; padding:3px 6px; border-radius:4px;
+  border:1px solid transparent; cursor:default; word-break:break-word;
+  transition:border-color .12s, background .12s; max-width:100%;
+}
+tr:hover .ch-title-text { border-color:var(--border-hi); background:var(--surface-3) }
+.ch-title-hint {
+  font-size:10px; color:var(--subtle); margin-left:5px; opacity:0;
+  transition:opacity .12s; user-select:none;
+}
+tr:hover .ch-title-hint { opacity:1 }
+.ch-title-input {
+  display:none; width:100%; background:var(--surface-3);
+  border:1.5px solid var(--accent); border-radius:4px; color:var(--text);
+  font-size:14px; padding:3px 8px; outline:none; font-family:inherit;
+  box-shadow:0 0 0 3px rgba(255,107,0,.13);
+}
+.ch-words {
+  color:var(--muted); font-size:12px;
+  font-family:ui-monospace,'Cascadia Code',monospace;
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.ch-file-tag {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10px; color:var(--green); font-weight:600;
+  background:var(--green-dim); padding:1px 5px; border-radius:3px;
+  max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  vertical-align:middle; margin-left:4px;
+}
+.ch-actions-cell { display:flex; gap:5px; justify-content:flex-end }
+
+/* ── ADD ROW ────────────────────────────── */
+.add-row { display:none }
+.add-row.open { display:table-row; background:rgba(255,107,0,.04) }
+.add-row td { padding:10px 10px; vertical-align:top }
+.add-row td:first-child { padding-left:0; vertical-align:middle }
+.add-input {
+  width:100%; background:var(--surface-3); border:1.5px solid var(--accent);
+  border-radius:4px; color:var(--text); font-size:14px; padding:5px 9px;
+  outline:none; font-family:inherit; box-shadow:0 0 0 3px rgba(255,107,0,.12);
+}
+.add-shortcut-hint { font-size:10px; color:var(--subtle); margin-top:4px }
+
+/* Upload area */
+.upload-area {
+  display:flex; flex-direction:column; gap:5px;
+}
+.upload-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.upload-label {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 11px;
+  background:var(--surface-3);
+  border:1.5px dashed var(--border-hi);
+  border-radius:6px;
+  font-size:11px; font-weight:600; color:var(--muted);
+  cursor:pointer; white-space:nowrap; user-select:none;
+  transition:all .14s;
+}
+.upload-label:hover {
+  background:var(--accent-dim);
+  border-color:rgba(255,107,0,.4);
+  color:var(--accent);
+}
+.upload-label.has-file {
+  background:var(--green-dim);
+  border-color:var(--green);
+  border-style:solid;
+  color:var(--green);
+}
+.accepted-types {
+  font-size:10px; color:var(--subtle);
+  letter-spacing:.02em; line-height:1.4;
+}
+.accepted-types strong { color:var(--muted); font-weight:600 }
+.file-selected-row {
+  display:none; align-items:center; gap:6px;
+  padding:4px 8px; border-radius:5px;
+  background:var(--green-dim); border:1px solid var(--green);
+}
+.file-selected-row.visible { display:flex }
+.file-sel-name {
+  font-size:11px; font-weight:600; color:var(--green);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:140px;
+}
+.file-clear {
+  background:none; border:none; color:var(--green); font-size:14px;
+  cursor:pointer; padding:0 1px; line-height:1; opacity:.7;
+  transition:opacity .12s, color .12s; flex-shrink:0;
+}
+.file-clear:hover { opacity:1; color:var(--red) }
+.add-btns-cell { display:flex; gap:5px; justify-content:flex-end; align-items:flex-start; padding-top:3px }
+
+/* Upload progress overlay */
+.db-saving-row {
+  display:none; align-items:center; gap:6px;
+  font-size:11px; color:var(--accent); font-weight:500;
+}
+.db-saving-row.visible { display:flex }
+.spinner {
+  width:12px; height:12px; border-radius:50%;
+  border:2px solid var(--accent-dim2); border-top-color:var(--accent);
+  animation:spin .7s linear infinite; flex-shrink:0;
+}
+@keyframes spin { to { transform:rotate(360deg) } }
+
+/* Empty state */
+.empty { text-align:center; padding:80px 24px; color:var(--muted) }
+.empty-icon  { font-size:48px; opacity:.3; margin-bottom:14px }
+.empty-title { font-size:15px; font-weight:500; margin-bottom:5px }
+.empty-sub   { font-size:12px; color:var(--subtle) }
+
+/* Toast */
+.toast {
+  position:fixed; bottom:20px; left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--surface-3); color:var(--text);
+  padding:8px 16px; border-radius:7px;
+  font-size:12px; font-weight:500; opacity:0;
+  transition:opacity .2s, transform .2s; pointer-events:none; z-index:999;
+  border:1px solid var(--border-hi); white-space:nowrap;
+  box-shadow:var(--shadow-sm);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0) }
+.toast.t-ok  { border-left:3px solid var(--green) }
+.toast.t-err { border-left:3px solid var(--red) }
+.toast.t-info{ border-left:3px solid var(--accent) }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:5px; height:5px }
+::-webkit-scrollbar-thumb { background:var(--border-hi); border-radius:3px }
+::-webkit-scrollbar-track { background:transparent }
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { transition-duration:.01ms !important; animation-duration:.01ms !important }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ──────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-box">K</div>
+      <div>
+        <div class="logo-text">KathaKar</div>
+        <div class="logo-sub">Writer Studio</div>
+      </div>
+    </div>
+    <div class="sidebar-head">
+      <span class="sidebar-label">My Stories <span id="story-count" style="color:var(--subtle)"></span></span>
+      <button class="btn-new" onclick="showToast('New story flow — coming soon','info')">＋ New</button>
+    </div>
+    <div class="story-list" id="story-list"></div>
+    <div class="sidebar-foot">
+      <button class="btn-write" onclick="showToast('Opening story editor…','info')">
+        ✏&nbsp; Write New Story
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────── -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-tabs">
+        <div class="tab active">Chapters</div>
+        <div class="tab" onclick="showToast('Analytics — coming soon','info')">Analytics</div>
+        <div class="tab" onclick="showToast('Settings — coming soon','info')">Settings</div>
+      </div>
+      <div class="topbar-right">
+        <button class="theme-btn" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">☀</button>
+        <span>Pramod Khot</span>
+        <div class="topbar-avatar"></div>
+      </div>
+    </div>
+
+    <div class="story-header" id="story-header">
+      <div>
+        <div class="story-title" id="story-title">Select a story</div>
+        <div class="story-badges" id="story-badges"></div>
+      </div>
+      <div class="story-actions" id="story-actions" style="display:none">
+        <button class="btn btn-ghost" onclick="showToast('Story details panel — coming soon','info')">
+          ⚙&nbsp; Edit Details
+        </button>
+        <button class="btn btn-primary" id="btn-add">
+          ＋&nbsp; Add Chapter
+        </button>
+      </div>
+    </div>
+
+    <div class="chapters-area" id="chapters-area">
+      <div class="empty">
+        <div class="empty-icon">📖</div>
+        <div class="empty-title">Select a story from the sidebar</div>
+        <div class="empty-sub">to view and manage its chapters</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+/* ── DATA ────────────────────────────────── */
+const stories = [
+  {
+    id:1, title:'Crime Files', status:'published',
+    genre:'Mystery', lang:'mr', color:'#6B1A2A',
+    chapters:[
+      {id:101,title:'केस फाईल "दिव्या पाटील" #1.1: बंद दरवाजा',words:627,status:'published',file:null},
+      {id:102,title:'केस फाईल #1.2: पाच चेहरे, पाच खोट',words:729,status:'published',file:null},
+      {id:103,title:'केस फाईल #1.3: ग्लासमधलं सत्य',words:927,status:'published',file:null},
+      {id:104,title:'केस फाईल #1.4: तुटलेले आलिबी',words:587,status:'published',file:null},
+      {id:105,title:'केस फाईल #1.5: अकरा फोटोंचा दिशोभ',words:636,status:'published',file:null},
+      {id:106,title:'केस फाईल #1.6: विधाची पावती',words:622,status:'published',file:null},
+      {id:107,title:'केस फाईल #1.7: रात्री बाराचा कॉल',words:671,status:'published',file:null},
+      {id:108,title:'केस फाईल #1.8: आलिबीला भीक',words:545,status:'published',file:null},
+      {id:109,title:'केस फाईल #1.9: सापळा',words:575,status:'published',file:null},
+      {id:110,title:'केस फाईल #1.10 Final: दिशोभ',words:844,status:'published',file:null},
+      {id:111,title:'केस फाईल #2.1: बंद बंगल्यातला मृतदेह',words:818,status:'published',file:null},
+    ]
+  },
+  {
+    id:2, title:'गुप्त', status:'published',
+    genre:'Mystery', lang:'mr', color:'#1A2F5C',
+    chapters:[
+      {id:201,title:'अध्याय १: रहस्य सुरू होतं',words:450,status:'published',file:null},
+      {id:202,title:'अध्याय २: खुलासा',words:520,status:'published',file:null},
+    ]
+  },
+  {
+    id:3, title:'Office', status:'published',
+    genre:'Drama', lang:'en', color:'#1A3A20',
+    chapters:[
+      {id:301,title:'Chapter 1: New Beginnings',words:612,status:'published',file:null},
+      {id:302,title:'Chapter 2: The Meeting',words:734,status:'published',file:null},
+      {id:303,title:'Chapter 3: Office Politics',words:891,status:'published',file:null},
+      {id:304,title:'Chapter 4: The Conflict',words:445,status:'published',file:null},
+      {id:305,title:'Chapter 5: Resolution',words:678,status:'published',file:null},
+    ]
+  }
+];
+
+let activeId    = null;
+let editingId   = null;
+let editOrig    = '';
+let nextId      = 900;
+let addOpen     = false;
+let selectedFile = null;
+
+/* ── THEME ───────────────────────────────── */
+(function initTheme() {
+  const saved = localStorage.getItem('kk-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+})();
+
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = t === 'dark' ? '☀' : '🌙';
+  try { localStorage.setItem('kk-theme', t) } catch(_){}
+}
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'light';
+  applyTheme(cur === 'dark' ? 'light' : 'dark');
+});
+
+/* ── SIDEBAR ─────────────────────────────── */
+function renderSidebar() {
+  document.getElementById('story-count').textContent = `(${stories.length})`;
+  document.getElementById('story-list').innerHTML = stories.map(s => `
+    <div class="story-item ${s.id===activeId?'active':''}" onclick="selectStory(${s.id})">
+      <div class="story-cover" style="background:${s.color}">${s.title[0]}</div>
+      <div class="story-info">
+        <div class="story-name">${esc(s.title)}</div>
+        <div class="story-meta">${s.chapters.length} chapter${s.chapters.length!==1?'s':''} &middot; ${s.genre}</div>
+        <div class="story-pills">
+          <span class="badge b-pub">${s.status}</span>
+          <span class="badge b-lang">${s.lang.toUpperCase()}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── SELECT STORY ────────────────────────── */
+function selectStory(id) {
+  if (editingId !== null) finishEdit(editingId, true);
+  activeId = id; addOpen = false; selectedFile = null;
+  renderSidebar(); renderMain();
+}
+
+/* ── MAIN PANEL ──────────────────────────── */
+function renderMain() {
+  const s = stories.find(x => x.id === activeId);
+  if (!s) return;
+
+  document.getElementById('story-title').textContent = s.title;
+  document.getElementById('story-actions').style.display = 'flex';
+  document.getElementById('story-badges').innerHTML =
+    `<span class="badge b-pub">${s.status}</span>
+     <span class="badge b-lang">${s.lang.toUpperCase()}</span>
+     <span class="badge b-genre">${s.genre}</span>`;
+
+  const totalWords = s.chapters.reduce((a,c) => a + c.words, 0);
+  document.getElementById('btn-add').onclick = openAddRow;
+
+  document.getElementById('chapters-area').innerHTML = `
+    <div class="ch-count">${s.chapters.length} chapter${s.chapters.length!==1?'s':''} &nbsp;&middot;&nbsp; ${totalWords.toLocaleString()} words total</div>
+    <div class="ch-table-wrap">
+      <table>
+        <colgroup>
+          <col class="col-num">
+          <col class="col-title">
+          <col class="col-words">
+          <col class="col-status">
+          <col class="col-actions">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title
+              <span style="font-weight:400;color:var(--subtle);font-size:10px;letter-spacing:0;text-transform:none">&nbsp;double-click to rename</span>
+            </th>
+            <th>Words</th>
+            <th>Status</th>
+            <th class="th-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ch-body">
+          ${s.chapters.map((ch,i) => rowHTML(ch, i+1)).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="add-row ${addOpen?'open':''}" id="add-row">
+            <td style="vertical-align:middle">
+              <div class="ch-num" style="background:var(--surface-3);color:var(--subtle)">+</div>
+            </td>
+            <td>
+              <input class="add-input" id="add-input" placeholder="New chapter title…">
+              <div class="add-shortcut-hint">Enter to save &nbsp;·&nbsp; Esc to cancel</div>
+            </td>
+            <td colspan="2">
+              <div class="upload-area">
+                <div class="upload-row">
+                  <label class="upload-label" id="upload-label" for="ch-file-input" title="Attach a chapter file">
+                    📎 <span id="upload-label-text">Attach file</span>
+                  </label>
+                  <input type="file" id="ch-file-input"
+                         accept=".txt,.doc,.docx,.pdf,.rtf,.md"
+                         style="display:none">
+                </div>
+                <div class="file-selected-row" id="file-selected-row">
+                  <span>✓</span>
+                  <span class="file-sel-name" id="file-sel-name"></span>
+                  <button class="file-clear" onclick="clearFile()" title="Remove file">×</button>
+                </div>
+                <div class="accepted-types">
+                  <strong>Accepted:</strong>&nbsp; .txt &nbsp;.doc &nbsp;.docx &nbsp;.pdf &nbsp;.rtf &nbsp;.md
+                </div>
+                <div class="db-saving-row" id="db-saving-row">
+                  <div class="spinner"></div>
+                  <span id="db-saving-text">Saving to database…</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="add-btns-cell">
+                <button class="btn btn-ghost" onclick="closeAddRow()">Cancel</button>
+                <button class="btn btn-primary" id="add-confirm-btn" onclick="saveNewChapter()">Add</button>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>`;
+
+  const addInp = document.getElementById('add-input');
+  if (addInp) {
+    if (addOpen) addInp.focus();
+    addInp.addEventListener('keydown', e => {
+      if (e.key === 'Enter')  { e.preventDefault(); saveNewChapter() }
+      if (e.key === 'Escape') closeAddRow();
+    });
+  }
+
+  const fileInput = document.getElementById('ch-file-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0] || null;
+      selectedFile = file;
+      refreshUploadUI();
+    });
+  }
+
+  if (addOpen && selectedFile) refreshUploadUI();
+
+  bindChapterEvents();
+}
+
+/* ── UPLOAD UI STATE ─────────────────────── */
+function refreshUploadUI() {
+  const lbl     = document.getElementById('upload-label');
+  const lblTxt  = document.getElementById('upload-label-text');
+  const selRow  = document.getElementById('file-selected-row');
+  const selName = document.getElementById('file-sel-name');
+  if (!lbl || !lblTxt) return;
+
+  if (selectedFile) {
+    const n = selectedFile.name;
+    lblTxt.textContent = 'File attached';
+    lbl.classList.add('has-file');
+    if (selRow)  selRow.classList.add('visible');
+    if (selName) selName.textContent = n.length > 28 ? n.slice(0,26)+'…' : n;
+  } else {
+    lblTxt.textContent = 'Attach file';
+    lbl.classList.remove('has-file');
+    if (selRow) selRow.classList.remove('visible');
+    if (selName) selName.textContent = '';
+  }
+}
+
+function clearFile() {
+  selectedFile = null;
+  const inp = document.getElementById('ch-file-input');
+  if (inp) inp.value = '';
+  refreshUploadUI();
+}
+
+/* ── EVENT DELEGATION ────────────────────── */
+function bindChapterEvents() {
+  const body = document.getElementById('ch-body');
+  if (!body) return;
+  body.addEventListener('dblclick', e => {
+    const txt = e.target.closest('.ch-title-text');
+    if (txt) startEdit(+txt.closest('tr').dataset.id);
+  });
+  body.addEventListener('click', e => {
+    const eb = e.target.closest('[data-edit]');
+    if (eb) {
+      const s  = stories.find(x => x.id === activeId);
+      const ch = s.chapters.find(c => c.id === +eb.dataset.edit);
+      showToast(`Opening editor: "${ch.title.slice(0,50)}${ch.title.length>50?'…':''}"`, 'info');
+      return;
+    }
+    const db = e.target.closest('[data-del]');
+    if (db) deleteChapter(+db.dataset.del);
+  });
+}
+
+/* ── INLINE EDIT ─────────────────────────── */
+function startEdit(chId) {
+  if (editingId !== null && editingId !== chId) finishEdit(editingId, true);
+  const s  = stories.find(x => x.id === activeId);
+  const ch = s.chapters.find(c => c.id === chId);
+  editingId = chId; editOrig = ch.title;
+
+  const txt = document.getElementById(`txt-${chId}`);
+  const inp = document.getElementById(`inp-${chId}`);
+  const row = document.getElementById(`row-${chId}`);
+  txt.style.display = 'none'; inp.style.display = 'block';
+  inp.value = ch.title; row.classList.add('is-editing');
+  inp.focus(); inp.select();
+
+  inp._kd = e => {
+    if (e.key === 'Enter')  { e.preventDefault(); finishEdit(chId, false) }
+    if (e.key === 'Escape') finishEdit(chId, true);
+  };
+  inp._bl = () => { if (editingId === chId) finishEdit(chId, false) };
+  inp.addEventListener('keydown', inp._kd);
+  inp.addEventListener('blur',    inp._bl);
+}
+
+function finishEdit(chId, cancel) {
+  if (editingId !== chId) return;
+  const inp = document.getElementById(`inp-${chId}`);
+  const txt = document.getElementById(`txt-${chId}`);
+  const row = document.getElementById(`row-${chId}`);
+  if (!inp || !txt) { editingId = null; return }
+
+  inp.removeEventListener('keydown', inp._kd);
+  inp.removeEventListener('blur',    inp._bl);
+  editingId = null;
+  const newTitle = inp.value.trim();
+
+  if (cancel || !newTitle || newTitle === editOrig) {
+    txt.firstChild.textContent = editOrig;
+    inp.style.display = 'none'; txt.style.display = '';
+    row.classList.remove('is-editing');
+    if (!cancel && !newTitle) showToast('Title cannot be empty — change cancelled', 'err');
+    return;
+  }
+
+  const s  = stories.find(x => x.id === activeId);
+  const ch = s.chapters.find(c => c.id === chId);
+  ch.title = newTitle;
+  txt.firstChild.textContent = newTitle;
+  inp.style.display = 'none'; txt.style.display = '';
+  row.classList.remove('is-editing');
+  row.classList.add('flash-saved');
+  setTimeout(() => row.classList.remove('flash-saved'), 1400);
+  row.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  showToast(`Renamed in "${s.title}"`, 'ok');
+}
+
+/* ── DELETE ──────────────────────────────── */
+function deleteChapter(chId) {
+  const s  = stories.find(x => x.id === activeId);
+  const ch = s.chapters.find(c => c.id === chId);
+  if (!confirm(`Delete "${ch.title}"?\nThis cannot be undone.`)) return;
+  s.chapters = s.chapters.filter(c => c.id !== chId);
+  renderMain(); renderSidebar();
+  showToast('Chapter deleted', 'err');
+}
+
+/* ── ADD CHAPTER ─────────────────────────── */
+function openAddRow() {
+  addOpen = true; selectedFile = null;
+  renderMain();
+  document.getElementById('add-input')?.focus();
+  document.getElementById('add-row')?.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function closeAddRow() {
+  addOpen = false; selectedFile = null;
+  const row = document.getElementById('add-row');
+  if (row) row.classList.remove('open');
+}
+
+function saveNewChapter() {
+  const inp   = document.getElementById('add-input');
+  const title = inp?.value?.trim();
+  if (!title) { showToast('Enter a chapter title first', 'err'); inp?.focus(); return }
+
+  const s = stories.find(x => x.id === activeId);
+  const fileForSave = selectedFile;
+
+  /* Disable inputs during save */
+  const addBtn = document.getElementById('add-confirm-btn');
+  if (addBtn) { addBtn.disabled = true; addBtn.textContent = fileForSave ? 'Uploading…' : 'Saving…' }
+  if (inp) inp.disabled = true;
+
+  const savingRow  = document.getElementById('db-saving-row');
+  const savingText = document.getElementById('db-saving-text');
+  if (savingRow) savingRow.classList.add('visible');
+  if (savingText) savingText.textContent = fileForSave
+    ? `Uploading "${fileForSave.name.length > 22 ? fileForSave.name.slice(0,20)+'…' : fileForSave.name}" to DB…`
+    : 'Saving to database…';
+
+  showToast(fileForSave ? `Uploading "${fileForSave.name}"…` : 'Saving chapter…', 'info');
+
+  /* Simulate async DB write (700ms) */
+  setTimeout(() => {
+    const wordGuess = fileForSave ? Math.floor(300 + (fileForSave.size || 800) / 6) : 0;
+    const ch = {
+      id:++nextId, title,
+      words: wordGuess,
+      status:'draft',
+      file: fileForSave ? fileForSave.name : null
+    };
+    s.chapters.push(ch);
+    selectedFile = null; addOpen = false;
+    renderMain(); renderSidebar();
+
+    const newRow = document.getElementById(`row-${ch.id}`);
+    if (newRow) {
+      newRow.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      newRow.classList.add('flash-saved');
+      setTimeout(() => newRow.classList.remove('flash-saved'), 1500);
+    }
+    showToast(
+      fileForSave
+        ? `"${fileForSave.name}" uploaded & saved to DB`
+        : `Chapter added to "${s.title}"`,
+      'ok'
+    );
+  }, 700);
+}
+
+/* ── ROW HTML ────────────────────────────── */
+function rowHTML(ch, n) {
+  const fileTag = ch.file
+    ? `<span class="ch-file-tag" title="${escAttr(ch.file)}">📎 ${esc(ch.file.length>12?ch.file.slice(0,10)+'…':ch.file)}</span>`
+    : '';
+  return `
+  <tr id="row-${ch.id}" data-id="${ch.id}">
+    <td><div class="ch-num">${n}</div></td>
+    <td>
+      <span class="ch-title-text" id="txt-${ch.id}">${esc(ch.title)}<span class="ch-title-hint">✎ rename</span></span>
+      <input class="ch-title-input" id="inp-${ch.id}" value="${escAttr(ch.title)}">
+    </td>
+    <td class="ch-words">${ch.words > 0 ? ch.words.toLocaleString() : '—'}${fileTag}</td>
+    <td><span class="badge b-${ch.status==='published'?'pub':'draft'}">${ch.status}</span></td>
+    <td>
+      <div class="ch-actions-cell">
+        <button class="btn btn-ghost" data-edit="${ch.id}">✏ Edit</button>
+        <button class="btn btn-danger" data-del="${ch.id}">Delete</button>
+      </div>
+    </td>
+  </tr>`;
+}
+
+/* ── TOAST ───────────────────────────────── */
+let toastTimer;
+function showToast(msg, type='ok') {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg; el.className = `toast t-${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* ── HELPERS ─────────────────────────────── */
+function esc(s)     { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function escAttr(s) { return s.replace(/"/g,'&quot;') }
+
+/* ── INIT ────────────────────────────────── */
+renderSidebar();
+selectStory(1);
+</script>
+</body>
+</html>
