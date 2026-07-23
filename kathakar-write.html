@@ -360,14 +360,143 @@ table.ch-table {
   .table-section { padding: 14px 14px 24px; }
 }
 
-  .theme-btn {
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    background: transparent; border: 1px solid var(--border-hi);
-    border-radius: 6px; cursor: pointer; font-size: 16px;
-    color: var(--muted); transition: background .15s, color .15s;
-  }
-  .theme-btn:hover { background: var(--surface2); color: var(--text); }
+.theme-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--border-hi);
+  border-radius: 6px; cursor: pointer; font-size: 16px;
+  color: var(--muted); transition: background .15s, color .15s;
+}
+.theme-btn:hover { background: var(--surface2); color: var(--text); }
+
+/* ── Tab bar ── */
+.tab-bar {
+  display: flex; margin-top: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.tab-btn {
+  padding: 8px 18px 9px; border: none; background: none;
+  font-size: 14px; font-weight: 600; color: var(--muted);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; font-family: inherit;
+  transition: color .15s, border-color .15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* ── Tab panels ── */
+.tab-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+/* ── Sort row inside chapters tab ── */
+.panel-sort-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 24px 9px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Analytics tab ── */
+.analytics-wrap { padding: 24px; overflow-y: auto; flex: 1; }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px; margin-bottom: 8px;
+}
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px;
+}
+.stat-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px;
+}
+.stat-value {
+  font-size: 26px; font-weight: 800; color: var(--text);
+  letter-spacing: -0.5px; font-variant-numeric: tabular-nums; line-height: 1;
+}
+.stat-sub { font-size: 11px; color: var(--subtle); margin-top: 4px; }
+
+/* ── Settings tab ── */
+.settings-wrap { padding: 24px; max-width: 560px; overflow-y: auto; flex: 1; }
+.settings-section { margin-bottom: 28px; }
+.settings-section-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--muted); margin-bottom: 14px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.settings-row-desc { font-size: 12px; color: var(--muted); }
+.toggle-btn {
+  flex-shrink: 0; padding: 7px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: 1px solid var(--border-hi); background: none; color: var(--muted);
+  font-family: inherit; transition: background .15s, color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.toggle-btn.publish { background: var(--orange); color: #fff; border-color: var(--orange); }
+.toggle-btn.publish:hover { background: var(--orange-hi); border-color: var(--orange-hi); }
+.toggle-btn.unpublish:hover { border-color: var(--red); color: var(--red); }
+
+/* ── Danger zone ── */
+.danger-zone {
+  border: 1px solid rgba(198,40,40,0.25); border-radius: 12px;
+  padding: 18px 20px; background: var(--red-dim);
+}
+.danger-zone-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--red); margin-bottom: 14px;
+}
+.danger-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.danger-row-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.danger-row-desc { font-size: 12px; color: var(--muted); }
+.btn-danger {
+  flex-shrink: 0; padding: 7px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  border: 1px solid var(--red); background: none; color: var(--red);
+  font-family: inherit; transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.btn-danger:hover { background: var(--red); color: #fff; }
+
+/* ── Delete modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.modal-box {
+  background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 16px; padding: 28px; max-width: 420px; width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+.modal-icon { font-size: 30px; margin-bottom: 12px; }
+.modal-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; letter-spacing: -0.3px; }
+.modal-body { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 22px; }
+.modal-body strong { color: var(--text); font-weight: 700; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.modal-cancel {
+  padding: 9px 20px; border: 1px solid var(--border-hi); border-radius: 9px;
+  background: none; color: var(--muted); font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s;
+}
+.modal-cancel:hover { border-color: var(--text); color: var(--text); }
+.modal-next {
+  padding: 9px 20px; border: 1px solid var(--border-hi); border-radius: 9px;
+  background: var(--surface3); color: var(--text); font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.modal-next:hover { background: var(--surface2); }
+.modal-confirm {
+  padding: 9px 20px; border: none; border-radius: 9px;
+  background: var(--red); color: #fff; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.modal-confirm:hover { background: #b71c1c; }
+.modal-confirm:disabled { opacity: 0.55; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -440,35 +569,75 @@ table.ch-table {
             <a class="btn-primary-sm" id="add-chapter-btn" data-testid="add-chapter-btn" href="#" onclick="goToAddChapter(event)">+ Add Chapter</a>
           </div>
         </div>
-        <div class="panel-row2">
+        <!-- Tab bar -->
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="chapters" data-testid="tab-chapters" onclick="switchTab('chapters')">Chapters</button>
+          <button class="tab-btn" data-tab="analytics" data-testid="tab-analytics" onclick="switchTab('analytics')">Analytics</button>
+          <button class="tab-btn" data-tab="settings" data-testid="tab-settings" onclick="switchTab('settings')">Settings</button>
+        </div>
+      </div>
+
+      <!-- ── Tab: Chapters ── -->
+      <div id="tab-chapters" class="tab-panel">
+        <div class="panel-sort-row">
           <span class="sort-label">Sort:</span>
           <div class="sort-group">
             <button class="sort-btn active" id="sort-chapter-btn" data-testid="sort-by-chapter" onclick="setSortMode('chapter')">Ch #</button>
             <button class="sort-btn" id="sort-date-btn" data-testid="sort-by-date" onclick="setSortMode('date')">Date ↓</button>
           </div>
         </div>
+        <div class="table-section">
+          <div class="table-header">
+            <span class="table-title">Chapters <span class="ch-count-badge" id="chapter-count" data-testid="chapter-count">0</span></span>
+          </div>
+          <div class="table-wrap">
+            <table class="ch-table" data-testid="chapters-table">
+              <thead>
+                <tr>
+                  <th style="width:38px">#</th>
+                  <th>Title</th>
+                  <th style="width:70px">Words</th>
+                  <th style="width:100px">Status</th>
+                  <th style="width:110px">Date</th>
+                  <th style="width:230px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="chapters-tbody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <!-- Table section -->
-      <div class="table-section">
-        <div class="table-header">
-          <span class="table-title">Chapters <span class="ch-count-badge" id="chapter-count" data-testid="chapter-count">0</span></span>
+      <!-- ── Tab: Analytics ── -->
+      <div id="tab-analytics" class="tab-panel" style="display:none">
+        <div class="analytics-wrap">
+          <div class="stats-grid" id="stats-grid"></div>
         </div>
-        <div class="table-wrap">
-          <table class="ch-table" data-testid="chapters-table">
-            <thead>
-              <tr>
-                <th style="width:38px">#</th>
-                <th>Title</th>
-                <th style="width:70px">Words</th>
-                <th style="width:100px">Status</th>
-                <th style="width:110px">Date</th>
-                <th style="width:230px">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="chapters-tbody">
-            </tbody>
-          </table>
+      </div>
+
+      <!-- ── Tab: Settings ── -->
+      <div id="tab-settings" class="tab-panel" style="display:none">
+        <div class="settings-wrap">
+          <div class="settings-section">
+            <div class="settings-section-title">Visibility</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label" id="visibility-label">Story is Published</div>
+                <div class="settings-row-desc" id="visibility-desc">Your story is visible to readers on the platform.</div>
+              </div>
+              <button class="toggle-btn unpublish" id="visibility-btn" data-testid="toggle-publish-btn" onclick="togglePublishStatus()">Unpublish</button>
+            </div>
+          </div>
+          <div class="danger-zone">
+            <div class="danger-zone-title">Danger Zone</div>
+            <div class="danger-row">
+              <div>
+                <div class="danger-row-label">Delete this story</div>
+                <div class="danger-row-desc">Permanently deletes this story and all its chapters. This cannot be undone.</div>
+              </div>
+              <button class="btn-danger" data-testid="delete-story-btn" onclick="startDeleteStory()">Delete Story</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -476,6 +645,36 @@ table.ch-table {
   </main>
 
 </div><!-- /app-body -->
+
+<!-- ── Delete story modal (2-step) ── -->
+<div id="delete-modal" class="modal-overlay" style="display:none" data-testid="delete-modal">
+  <!-- Step 1: Initial warning -->
+  <div class="modal-box" id="delete-step1">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">Delete Story?</div>
+    <div class="modal-body">
+      You are about to delete <strong id="delete-story-name"></strong>.<br><br>
+      All chapters inside this story will also be permanently removed. This action cannot be undone.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="modal-next" data-testid="delete-step1-continue" onclick="goToDeleteStep2()">Yes, continue →</button>
+    </div>
+  </div>
+  <!-- Step 2: Final confirmation -->
+  <div class="modal-box" id="delete-step2" style="display:none">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title">Are you absolutely sure?</div>
+    <div class="modal-body">
+      All <strong id="delete-chapter-count"></strong> chapters in <strong id="delete-story-name2"></strong> will be permanently deleted from the database.<br><br>
+      <strong>There is no way to recover this data.</strong>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="modal-confirm" data-testid="confirm-delete-forever-btn" onclick="executeDeleteStory()">Delete Forever</button>
+    </div>
+  </div>
+</div>
 
 <!-- Toast -->
 <div id="toast" data-testid="toast" data-toast-type="info" role="status" aria-live="polite"></div>
@@ -583,6 +782,7 @@ function renderStoryList() {
 // ── Select story ─────────────────────────────────────────────────────────────
 async function selectStory(storyId) {
   selectedStoryId = storyId;
+  switchTab('chapters');
   // Update active state in sidebar
   document.querySelectorAll('.story-item').forEach(function(el) {
     el.classList.toggle('active', el.dataset.storyId === storyId);
@@ -599,10 +799,12 @@ async function selectStory(storyId) {
   var statusClass = story.status === 'PUBLISHED' ? 'pill-pub' : 'pill-draft';
   document.getElementById('panel-pills').innerHTML =
     '<span class="pill ' + statusClass + '">' + escHtml(story.status || 'DRAFT') + '</span>'
-    + (lang ? ' <span class="pill pill-lang">' + escHtml(lang) + '</span>' : '');
+    + (lang ? ' <span class="pill pill-lang">' + escHtml(lang) + '</span>' : '')
+    + (story.category ? ' <span class="pill pill-draft">' + escHtml(story.category.toUpperCase()) + '</span>' : '');
   document.getElementById('edit-story-btn').href = 'kathakar-edit-story.html?storyId=' + encodeURIComponent(storyId);
   // Load chapters
   await loadChapters(storyId);
+  renderSettings();
 }
 
 // ── Load chapters ────────────────────────────────────────────────────────────
@@ -924,6 +1126,148 @@ function showToast(msg, type) {
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  ['chapters', 'analytics', 'settings'].forEach(function(t) {
+    var panel = document.getElementById('tab-' + t);
+    var btn   = document.querySelector('[data-tab="' + t + '"]');
+    if (panel) panel.style.display = t === name ? 'flex' : 'none';
+    if (btn)   btn.classList.toggle('active', t === name);
+  });
+  if (name === 'analytics') renderAnalytics();
+  if (name === 'settings')  renderSettings();
+}
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
+function renderAnalytics() {
+  var story = stories.find(function(s) { return s.id === selectedStoryId; });
+  if (!story) return;
+  var totalCh   = chapters.length;
+  var pubCh     = chapters.filter(function(c) { return c.status === 'PUBLISHED'; }).length;
+  var draftCh   = totalCh - pubCh;
+  var totalWords = chapters.reduce(function(s, c) { return s + (c.wordCount || 0); }, 0);
+  var avgWords  = totalCh > 0 ? Math.round(totalWords / totalCh) : 0;
+  var lastUpd   = story.updatedAt ? formatDate(story.updatedAt) : '—';
+  var grid = document.getElementById('stats-grid');
+  if (!grid) return;
+  var stats = [
+    { label: 'Total Chapters',    value: totalCh,                  sub: 'chapters written' },
+    { label: 'Published',         value: pubCh,                    sub: 'live on platform' },
+    { label: 'Drafts',            value: draftCh,                  sub: 'not yet published' },
+    { label: 'Total Words',       value: totalWords.toLocaleString(), sub: 'across all chapters' },
+    { label: 'Avg Words/Chapter', value: avgWords.toLocaleString(),   sub: 'per chapter' },
+    { label: 'Last Updated',      value: lastUpd,                  sub: '', small: true },
+  ];
+  grid.innerHTML = stats.map(function(s) {
+    return '<div class="stat-card">'
+      + '<div class="stat-label">' + escHtml(s.label) + '</div>'
+      + '<div class="stat-value" style="' + (s.small ? 'font-size:18px' : '') + '">' + escHtml(String(s.value)) + '</div>'
+      + (s.sub ? '<div class="stat-sub">' + escHtml(s.sub) + '</div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+function renderSettings() {
+  var story = stories.find(function(s) { return s.id === selectedStoryId; });
+  if (!story) return;
+  var isPublished = story.status === 'PUBLISHED';
+  var labelEl = document.getElementById('visibility-label');
+  var descEl  = document.getElementById('visibility-desc');
+  var btnEl   = document.getElementById('visibility-btn');
+  if (labelEl) labelEl.textContent = isPublished ? 'Story is Published' : 'Story is Hidden (Draft)';
+  if (descEl)  descEl.textContent  = isPublished
+    ? 'Your story is visible to readers on the platform.'
+    : 'Your story is hidden from readers. Publish it to make it visible.';
+  if (btnEl) {
+    btnEl.textContent  = isPublished ? 'Unpublish' : 'Publish';
+    btnEl.className    = 'toggle-btn ' + (isPublished ? 'unpublish' : 'publish');
+    btnEl.disabled     = false;
+  }
+}
+
+async function togglePublishStatus() {
+  var story = stories.find(function(s) { return s.id === selectedStoryId; });
+  if (!story) return;
+  var newStatus = story.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
+  var btnEl = document.getElementById('visibility-btn');
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = '…'; }
+  try {
+    await db.collection('stories').doc(selectedStoryId).update({
+      status: newStatus,
+      updatedAt: firebase.firestore.Timestamp.now()
+    });
+    story.status = newStatus;
+    renderSettings();
+    renderStoryList();
+    // Refresh panel pills
+    var lang = LANG_MAP[story.language] || (story.language || '').toUpperCase().substring(0,2);
+    var statusClass = newStatus === 'PUBLISHED' ? 'pill-pub' : 'pill-draft';
+    document.getElementById('panel-pills').innerHTML =
+      '<span class="pill ' + statusClass + '">' + escHtml(newStatus) + '</span>'
+      + (lang ? ' <span class="pill pill-lang">' + escHtml(lang) + '</span>' : '')
+      + (story.category ? ' <span class="pill pill-draft">' + escHtml(story.category.toUpperCase()) + '</span>' : '');
+    showToast(newStatus === 'PUBLISHED' ? 'Story published' : 'Story unpublished', 'success');
+  } catch (e) {
+    showToast('Failed: ' + e.message, 'error');
+    renderSettings();
+  }
+}
+
+// ── Delete story (2-step modal) ───────────────────────────────────────────────
+function startDeleteStory() {
+  var story = stories.find(function(s) { return s.id === selectedStoryId; });
+  if (!story) return;
+  var name = story.title || 'Untitled';
+  document.getElementById('delete-story-name').textContent  = name;
+  document.getElementById('delete-story-name2').textContent = name;
+  document.getElementById('delete-chapter-count').textContent = chapters.length + ' chapter' + (chapters.length !== 1 ? 's' : '');
+  document.getElementById('delete-step1').style.display = '';
+  document.getElementById('delete-step2').style.display = 'none';
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+
+function goToDeleteStep2() {
+  document.getElementById('delete-step1').style.display = 'none';
+  document.getElementById('delete-step2').style.display = '';
+}
+
+function closeDeleteModal() {
+  document.getElementById('delete-modal').style.display = 'none';
+}
+
+async function executeDeleteStory() {
+  if (!selectedStoryId) return;
+  var btn = document.querySelector('[data-testid="confirm-delete-forever-btn"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting…'; }
+  try {
+    // Batch-delete all episodes
+    var epSnap = await db.collection('episodes').where('storyId', '==', selectedStoryId).get();
+    if (epSnap.docs.length > 0) {
+      var batch = db.batch();
+      epSnap.docs.forEach(function(doc) { batch.delete(doc.ref); });
+      await batch.commit();
+    }
+    // Delete the story doc
+    await db.collection('stories').doc(selectedStoryId).delete();
+    // Update local state
+    stories   = stories.filter(function(s) { return s.id !== selectedStoryId; });
+    selectedStoryId = null;
+    chapters  = [];
+    document.getElementById('stories-count').textContent = stories.length;
+    closeDeleteModal();
+    renderStoryList();
+    document.getElementById('no-story-wrap').style.display  = '';
+    document.getElementById('story-content').style.display  = 'none';
+    showToast('Story deleted permanently', 'success');
+    // Auto-select first remaining story if any
+    if (stories.length > 0) selectStory(stories[0].id);
+  } catch (e) {
+    showToast('Delete failed: ' + e.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Delete Forever'; }
+  }
 }
 </script>
 </body>
