@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Story — KathaKar</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<style>
+:root {
+  --orange:      #E8500A;
+  --orange-hi:   #FF6020;
+  --orange-dim:  rgba(232,80,10,0.12);
+  --orange-dim2: rgba(232,80,10,0.22);
+  --dark:        #0E0E12;
+  --surface:     #17171C;
+  --surface2:    #1F1F28;
+  --surface3:    #272733;
+  --text:        #F0EDE8;
+  --muted:       #8B8799;
+  --subtle:      #5A5768;
+  --border:      rgba(255,255,255,0.07);
+  --border-hi:   rgba(255,255,255,0.14);
+  --green:       #4CAF50;
+  --green-dim:   rgba(76,175,80,0.13);
+  --red:         #EF5350;
+  --red-dim:     rgba(239,83,80,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Helvetica Neue', Arial, system-ui, sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Topbar ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; height: 56px;
+  background: rgba(14,14,18,0.97); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.logo-k {
+  width: 28px; height: 28px; border-radius: 7px; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: #fff; font-style: italic; flex-shrink: 0;
+}
+.logo-text { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--orange); object-fit: cover; background: var(--surface2); }
+.user-name { font-size: 12px; color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sign-out-btn {
+  padding: 5px 12px; border: 1px solid var(--border-hi); border-radius: 100px;
+  background: none; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit;
+  transition: border-color .2s, color .2s;
+}
+.sign-out-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+/* ── Auth screen ── */
+#auth-screen {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--dark); text-align: center; padding: 40px 24px;
+}
+.auth-logo-box {
+  width: 72px; height: 72px; border-radius: 18px; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; font-weight: 800; color: #fff; font-style: italic;
+  margin-bottom: 24px; box-shadow: 0 0 48px rgba(232,80,10,0.35);
+}
+.auth-h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
+.auth-h1 em { color: var(--orange); font-style: normal; }
+.auth-sub { font-size: 15px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; max-width: 360px; }
+.google-btn {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 13px 28px; background: #fff; color: #111;
+  border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.35); transition: transform .15s, box-shadow .15s; font-family: inherit;
+}
+.google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 32px rgba(0,0,0,0.45); }
+.google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ── Main content ── */
+#main-content { display: none; }
+.page {
+  max-width: 720px; margin: 0 auto; padding: 80px 24px 80px;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--muted); text-decoration: none; margin-bottom: 24px;
+  transition: color .15s;
+}
+.breadcrumb:hover { color: var(--text); }
+.breadcrumb::before { content: '←'; font-size: 14px; }
+
+/* ── Page title ── */
+.page-title {
+  font-size: 24px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px;
+  text-wrap: balance;
+}
+.page-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+
+/* ── Form ── */
+.form-section { margin-bottom: 0; }
+.form-group { margin-bottom: 20px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }
+.form-label {
+  display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.9px; color: var(--muted); margin-bottom: 7px;
+}
+.form-label span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--subtle); }
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%; padding: 11px 14px;
+  background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 10px; color: var(--text); font-size: 14px; font-family: inherit;
+  transition: border-color .15s, box-shadow .15s; outline: none;
+  -webkit-appearance: none;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-dim);
+}
+.form-input::placeholder,
+.form-textarea::placeholder { color: var(--subtle); }
+.form-textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
+.form-select { cursor: pointer; }
+.form-select option { background: var(--surface); }
+
+/* ── Tags ── */
+.tags-wrap {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  padding: 8px 10px; background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 10px; min-height: 44px; cursor: text;
+  transition: border-color .15s, box-shadow .15s;
+}
+.tags-wrap:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-dim); }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; background: var(--orange-dim); border: 1px solid var(--orange-dim2);
+  border-radius: 100px; font-size: 12px; color: var(--orange); user-select: none;
+}
+.tag-chip button {
+  background: none; border: none; color: var(--orange); cursor: pointer;
+  font-size: 14px; line-height: 1; padding: 0; display: flex; align-items: center;
+  opacity: 0.7; transition: opacity .15s;
+}
+.tag-chip button:hover { opacity: 1; }
+.tag-input-el {
+  border: none; background: none; outline: none;
+  color: var(--text); font-size: 14px; font-family: inherit; min-width: 100px; flex: 1;
+}
+.tag-input-el::placeholder { color: var(--subtle); }
+.tags-hint { font-size: 11px; color: var(--subtle); margin-top: 5px; }
+
+/* ── Cover upload ── */
+.cover-drop-area {
+  border: 2px dashed var(--border-hi); border-radius: 12px;
+  padding: 32px; text-align: center; cursor: pointer;
+  transition: border-color .15s, background .15s; position: relative;
+}
+.cover-drop-area:hover,
+.cover-drop-area.dragging { border-color: var(--orange); background: var(--orange-dim); }
+.cover-drop-area input[type="file"] { display: none; }
+.cover-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.7; }
+.cover-drop-text { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.cover-drop-text strong { color: var(--orange); }
+.cover-preview-wrap { position: relative; border-radius: 12px; overflow: hidden; }
+.cover-preview-img { width: 100%; max-height: 220px; object-fit: cover; display: block; }
+.cover-remove-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(0,0,0,0.7); border: none; color: #fff; border-radius: 50%;
+  width: 30px; height: 30px; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.cover-remove-btn:hover { background: rgba(0,0,0,0.9); }
+
+/* ── Divider ── */
+.form-divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+/* ── Action buttons ── */
+.form-actions {
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  padding-top: 24px; border-top: 1px solid var(--border);
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 24px; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: transform .12s, box-shadow .12s, opacity .2s;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--orange); color: #fff; }
+.btn-primary:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,80,10,0.4); }
+.btn-outline { background: none; border: 1px solid var(--border-hi); color: var(--text); }
+.btn-outline:hover { border-color: var(--orange); color: var(--orange); }
+
+/* ── Spinner ── */
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 500;
+  z-index: 9999; transition: transform .25s, opacity .25s; pointer-events: none;
+  white-space: nowrap; opacity: 0;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#toast[data-toast-type="success"] { border-color: var(--green); color: var(--green); }
+#toast[data-toast-type="error"]   { border-color: var(--red);   color: var(--red);   }
+#toast[data-toast-type="info"]    { border-color: var(--orange); color: var(--orange); }
+</style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <a class="topbar-logo" href="kathakar.html">
+    <div class="logo-k">K</div>
+    <span class="logo-text">KathaKar</span>
+  </a>
+  <div class="topbar-right" id="topbar-user" style="display:none">
+    <img class="user-avatar" id="user-avatar" src="" alt="avatar">
+    <span class="user-name" id="user-name-topbar"></span>
+    <button class="sign-out-btn" onclick="doSignOut()">Sign out</button>
+  </div>
+</header>
+
+<!-- ── Auth screen ── -->
+<div id="auth-screen" data-testid="auth-screen">
+  <div class="auth-logo-box">K</div>
+  <h1 class="auth-h1">Katha<em>Kar</em></h1>
+  <p class="auth-sub">Sign in with your Google account to access Writer Studio.</p>
+  <button class="google-btn" data-testid="google-signin-btn" onclick="doSignIn()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Continue with Google
+  </button>
+</div>
+
+<!-- ── Main content ── -->
+<div id="main-content">
+  <div class="page">
+
+    <a class="breadcrumb" href="kathakar-write.html">My Stories</a>
+
+    <h1 class="page-title" id="page-title">New Story</h1>
+    <p class="page-sub" id="page-sub">Fill in the details below. You can edit these at any time.</p>
+
+    <div class="form-section">
+
+      <div class="form-group">
+        <label class="form-label" for="story-title-input">Story Title <span>*</span></label>
+        <input class="form-input" type="text" id="story-title-input" data-testid="story-title-input"
+               placeholder="Give your story a compelling title…" maxlength="100" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="story-desc-input">Description <span>*</span></label>
+        <textarea class="form-textarea" id="story-desc-input" data-testid="story-desc-input"
+                  placeholder="What is your story about? Hook the reader in 2–3 sentences…" rows="4"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="story-category-select">Category <span>*</span></label>
+          <select class="form-select" id="story-category-select" data-testid="story-category-select">
+            <option value="">Select category</option>
+            <option>Romance</option>
+            <option>Thriller</option>
+            <option>Fantasy</option>
+            <option>Horror</option>
+            <option>Drama</option>
+            <option>Comedy</option>
+            <option>Mystery</option>
+            <option>Sci-Fi</option>
+            <option>Historical</option>
+            <option>Mythology</option>
+            <option>Devotional</option>
+            <option>Biography</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="story-language-select">Language <span>*</span></label>
+          <select class="form-select" id="story-language-select" data-testid="story-language-select">
+            <option value="">Select language</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="mr">Marathi</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="bn">Bengali</option>
+            <option value="gu">Gujarati</option>
+            <option value="kn">Kannada</option>
+            <option value="pa">Punjabi</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tags <span>(press Enter or comma to add, max 5)</span></label>
+        <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tag-input').focus()">
+          <input class="tag-input-el" type="text" id="tag-input" data-testid="tag-input"
+                 placeholder="slowburn, fantasy, romance…" autocomplete="off">
+        </div>
+        <p class="tags-hint">Tags help readers discover your story.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cover Image <span>(optional — 3:4 ratio recommended)</span></label>
+        <div id="cover-upload-drop" data-testid="cover-upload-drop">
+          <div class="cover-drop-area" id="cover-drop-area">
+            <input type="file" id="cover-file" accept="image/*">
+            <div class="cover-icon">🖼</div>
+            <div class="cover-drop-text">
+              Drag &amp; drop or <strong>browse</strong> to upload cover<br>
+              <span style="font-size:12px;opacity:.7">JPG, PNG, WebP — max 5 MB</span>
+            </div>
+          </div>
+          <div class="cover-preview-wrap" id="cover-preview-wrap" style="display:none">
+            <img class="cover-preview-img" id="cover-preview-img" src="" alt="Cover preview">
+            <button class="cover-remove-btn" onclick="removeCover()" type="button" title="Remove cover">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="save-story-btn" data-testid="save-story-btn" onclick="saveStory()">
+          Save Story
+        </button>
+        <button class="btn btn-outline" id="cancel-btn" data-testid="cancel-btn" onclick="goBack()">
+          Cancel
+        </button>
+        <div id="save-status" style="margin-left:auto;font-size:13px;color:var(--muted)"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" data-testid="toast" data-toast-type="info" role="status" aria-live="polite"></div>
+
+<script>
+// ── Firebase ─────────────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey: "AIzaSyAlBgMkCbsOSqVAj3kcr8WeYCLcagK4B7U",
+  authDomain: "kathakar-8b43a.firebaseapp.com",
+  projectId: "kathakar-8b43a",
+  storageBucket: "kathakar-8b43a.firebasestorage.app",
+  messagingSenderId: "843855541873",
+  appId: "1:843855541873:web:230f1720020e0057ed4dd0"
+});
+const auth     = firebase.auth();
+const db       = firebase.firestore();
+const storage  = firebase.storage();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// ── State ────────────────────────────────────────────────────────────────────
+let currentUser = null;
+let storyId     = null; // null = create mode, string = edit mode
+let tags        = [];
+let coverFile   = null;
+let existingCoverUrl = '';
+
+// Parse URL params
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  storyId = params.get('storyId') || null;
+})();
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(function(user) {
+  currentUser = user;
+  if (user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('topbar-user').style.display = 'flex';
+    document.getElementById('user-avatar').src = user.photoURL || '';
+    document.getElementById('user-name-topbar').textContent = user.displayName || user.email || '';
+    if (storyId) {
+      loadStoryForEdit(storyId);
+    } else {
+      setupCreateMode();
+    }
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'none';
+    document.getElementById('topbar-user').style.display = 'none';
+  }
+});
+
+function doSignIn() {
+  auth.signInWithPopup(provider).catch(function(e) { showToast('Sign-in failed: ' + e.message, 'error'); });
+}
+function doSignOut() { auth.signOut(); }
+
+function goBack() {
+  window.location.href = storyId ? 'kathakar-write.html?selected=' + encodeURIComponent(storyId) : 'kathakar-write.html';
+}
+
+// ── Create mode ───────────────────────────────────────────────────────────────
+function setupCreateMode() {
+  document.getElementById('page-title').textContent = 'New Story';
+  document.getElementById('page-sub').textContent = 'Fill in the details below to create your story.';
+  document.getElementById('save-story-btn').textContent = 'Create Story';
+}
+
+// ── Load story for edit ───────────────────────────────────────────────────────
+async function loadStoryForEdit(id) {
+  document.getElementById('save-story-btn').disabled = true;
+  document.getElementById('save-story-btn').innerHTML = '<span class="spinner"></span> Loading…';
+  try {
+    const doc = await db.collection('stories').doc(id).get();
+    if (!doc.exists) { showToast('Story not found', 'error'); setupCreateMode(); return; }
+    const s = doc.data();
+    document.getElementById('page-title').textContent = 'Edit Story';
+    document.getElementById('page-sub').textContent = 'Update your story details below.';
+    document.getElementById('story-title-input').value    = s.title || '';
+    document.getElementById('story-desc-input').value     = s.description || '';
+    document.getElementById('story-category-select').value = s.category || '';
+    document.getElementById('story-language-select').value = s.language || '';
+    tags = Array.isArray(s.tags) ? s.tags.slice() : [];
+    renderTags();
+    existingCoverUrl = s.coverUrl || '';
+    if (existingCoverUrl) {
+      document.getElementById('cover-drop-area').style.display = 'none';
+      document.getElementById('cover-preview-wrap').style.display = 'block';
+      document.getElementById('cover-preview-img').src = existingCoverUrl;
+    }
+    document.getElementById('save-story-btn').disabled = false;
+    document.getElementById('save-story-btn').textContent = 'Update Story';
+  } catch (e) {
+    showToast('Failed to load story: ' + e.message, 'error');
+    document.getElementById('save-story-btn').disabled = false;
+    document.getElementById('save-story-btn').textContent = 'Save Story';
+  }
+}
+
+// ── Tags ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const tagInput = document.getElementById('tag-input');
+  tagInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = tagInput.value.trim().replace(/,/g, '');
+      addTag(val);
+      tagInput.value = '';
+    }
+    if (e.key === 'Backspace' && tagInput.value === '' && tags.length) {
+      removeTag(tags[tags.length - 1]);
+    }
+  });
+
+  // Cover drag & drop
+  const dropArea = document.getElementById('cover-drop-area');
+  const coverFileInput = document.getElementById('cover-file');
+
+  dropArea.addEventListener('dragover', function(e) { e.preventDefault(); dropArea.classList.add('dragging'); });
+  dropArea.addEventListener('dragleave', function() { dropArea.classList.remove('dragging'); });
+  dropArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropArea.classList.remove('dragging');
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) applyCoverFile(file);
+  });
+  dropArea.addEventListener('click', function() { coverFileInput.click(); });
+  coverFileInput.addEventListener('change', function(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) applyCoverFile(file);
+  });
+});
+
+function addTag(val) {
+  const tag = val.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-ऀ-ॿঀ-৿઀-૿଀-୿஀-௿ఀ-౿ಀ-೿ഀ-ൿ]/g, '');
+  if (!tag || tags.includes(tag) || tags.length >= 5) return;
+  tags.push(tag);
+  renderTags();
+}
+function removeTag(tag) {
+  tags = tags.filter(function(t) { return t !== tag; });
+  renderTags();
+}
+function renderTags() {
+  const wrap = document.getElementById('tags-wrap');
+  wrap.querySelectorAll('.tag-chip').forEach(function(el) { el.remove(); });
+  tags.forEach(function(tag) {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = '#' + escHtml(tag) + ' <button type="button" aria-label="Remove ' + escAttr(tag) + '" onclick="removeTag(\'' + escAttr(tag) + '\')">&times;</button>';
+    wrap.insertBefore(chip, document.getElementById('tag-input'));
+  });
+}
+
+// ── Cover ─────────────────────────────────────────────────────────────────────
+function applyCoverFile(file) {
+  if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5 MB', 'error'); return; }
+  coverFile = file;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('cover-preview-img').src = ev.target.result;
+    document.getElementById('cover-drop-area').style.display = 'none';
+    document.getElementById('cover-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+function removeCover() {
+  coverFile = null;
+  existingCoverUrl = '';
+  document.getElementById('cover-file').value = '';
+  document.getElementById('cover-preview-img').src = '';
+  document.getElementById('cover-drop-area').style.display = 'block';
+  document.getElementById('cover-preview-wrap').style.display = 'none';
+}
+
+// ── generateSearchTokens ──────────────────────────────────────────────────────
+function generateSearchTokens(title, authorName) {
+  const tokens = new Set();
+  [title || '', authorName || ''].forEach(function(str) {
+    str.toLowerCase().split(/\s+/).forEach(function(word) {
+      if (word.length >= 2) {
+        for (let i = 2; i <= word.length; i++) tokens.add(word.substring(0, i));
+      }
+    });
+  });
+  return Array.from(tokens);
+}
+
+// ── Save / Create story ───────────────────────────────────────────────────────
+async function saveStory() {
+  const title    = (document.getElementById('story-title-input').value || '').trim();
+  const desc     = (document.getElementById('story-desc-input').value || '').trim();
+  const category = document.getElementById('story-category-select').value;
+  const language = document.getElementById('story-language-select').value;
+
+  if (!title)    { showToast('Please enter a story title', 'error'); document.getElementById('story-title-input').focus(); return; }
+  if (!desc)     { showToast('Please enter a description', 'error'); document.getElementById('story-desc-input').focus(); return; }
+  if (!category) { showToast('Please select a category', 'error'); return; }
+  if (!language) { showToast('Please select a language', 'error'); return; }
+
+  const btn = document.getElementById('save-story-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> ' + (storyId ? 'Updating…' : 'Creating…');
+  document.getElementById('save-status').textContent = '';
+
+  try {
+    const authorName = currentUser.displayName || currentUser.email || '';
+    const searchTokens = generateSearchTokens(title, authorName);
+    const now = firebase.firestore.Timestamp.now();
+
+    let coverUrl = existingCoverUrl;
+
+    if (storyId) {
+      // ── Edit mode ────────────────────────────────────────────────────────────
+      if (coverFile) {
+        showToast('Uploading cover…', 'info');
+        const ref = storage.ref('story_covers/' + storyId + '.jpg');
+        await ref.put(coverFile);
+        coverUrl = await ref.getDownloadURL();
+      }
+      const updateData = {
+        title, description: desc, category, language, tags,
+        searchTokens, updatedAt: now
+      };
+      if (coverUrl !== existingCoverUrl || coverFile) updateData.coverUrl = coverUrl;
+      await db.collection('stories').doc(storyId).update(updateData);
+      showToast('Story updated!', 'success');
+      setTimeout(function() {
+        window.location.href = 'kathakar-write.html?selected=' + encodeURIComponent(storyId);
+      }, 600);
+    } else {
+      // ── Create mode ──────────────────────────────────────────────────────────
+      const storyRef = db.collection('stories').doc();
+      const newId = storyRef.id;
+      if (coverFile) {
+        showToast('Uploading cover…', 'info');
+        const ref = storage.ref('story_covers/' + newId + '.jpg');
+        await ref.put(coverFile);
+        coverUrl = await ref.getDownloadURL();
+      }
+      await storyRef.set({
+        storyId:       newId,
+        title,
+        description:   desc,
+        coverUrl:      coverUrl || '',
+        authorId:      currentUser.uid,
+        authorName,
+        category,
+        language,
+        tags,
+        searchTokens,
+        status:        'DRAFT',
+        totalEpisodes: 0,
+        totalReads:    0,
+        avgRating:     0,
+        totalRatings:  0,
+        createdAt:     now,
+        updatedAt:     now
+      });
+      // Update user's storiesCount (best-effort)
+      try {
+        await db.collection('users').doc(currentUser.uid).update({
+          storiesCount: firebase.firestore.FieldValue.increment(1)
+        });
+      } catch (_) {}
+      showToast('Story created!', 'success');
+      setTimeout(function() {
+        window.location.href = 'kathakar-write.html?selected=' + encodeURIComponent(newId);
+      }, 600);
+    }
+  } catch (e) {
+    showToast('Failed to save: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = storyId ? 'Update Story' : 'Create Story';
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+var toastTimer;
+function showToast(msg, type) {
+  type = type || 'info';
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.setAttribute('data-toast-type', type);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+</script>
+</body>
+</html>

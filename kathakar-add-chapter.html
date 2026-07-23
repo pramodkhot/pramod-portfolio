@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Chapter — KathaKar</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root {
+  --orange:      #E8500A;
+  --orange-hi:   #FF6020;
+  --orange-dim:  rgba(232,80,10,0.12);
+  --orange-dim2: rgba(232,80,10,0.22);
+  --dark:        #0E0E12;
+  --surface:     #17171C;
+  --surface2:    #1F1F28;
+  --surface3:    #272733;
+  --text:        #F0EDE8;
+  --muted:       #8B8799;
+  --subtle:      #5A5768;
+  --border:      rgba(255,255,255,0.07);
+  --border-hi:   rgba(255,255,255,0.14);
+  --green:       #4CAF50;
+  --green-dim:   rgba(76,175,80,0.13);
+  --red:         #EF5350;
+  --red-dim:     rgba(239,83,80,0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Helvetica Neue', Arial, system-ui, sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Topbar ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; height: 56px;
+  background: rgba(14,14,18,0.97); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.logo-k {
+  width: 28px; height: 28px; border-radius: 7px; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: #fff; font-style: italic; flex-shrink: 0;
+}
+.logo-text { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--orange); object-fit: cover; background: var(--surface2); }
+.user-name { font-size: 12px; color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sign-out-btn {
+  padding: 5px 12px; border: 1px solid var(--border-hi); border-radius: 100px;
+  background: none; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit;
+  transition: border-color .2s, color .2s;
+}
+.sign-out-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+/* ── Auth screen ── */
+#auth-screen {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--dark); text-align: center; padding: 40px 24px;
+}
+.auth-logo-box {
+  width: 72px; height: 72px; border-radius: 18px; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; font-weight: 800; color: #fff; font-style: italic;
+  margin-bottom: 24px; box-shadow: 0 0 48px rgba(232,80,10,0.35);
+}
+.auth-h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
+.auth-h1 em { color: var(--orange); font-style: normal; }
+.auth-sub { font-size: 15px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; max-width: 360px; }
+.google-btn {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 13px 28px; background: #fff; color: #111;
+  border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.35); transition: transform .15s, box-shadow .15s; font-family: inherit;
+}
+.google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 32px rgba(0,0,0,0.45); }
+.google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ── Main content ── */
+#main-content { display: none; }
+.page {
+  max-width: 760px; margin: 0 auto; padding: 80px 24px 80px;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--muted); text-decoration: none; margin-bottom: 24px;
+  transition: color .15s;
+}
+.breadcrumb:hover { color: var(--text); }
+.breadcrumb::before { content: '←'; font-size: 14px; }
+
+/* ── Page title ── */
+.page-title {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 4px;
+  text-wrap: balance;
+}
+.page-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+
+/* ── Status indicator ── */
+.status-indicator {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 24px;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; }
+.status-dot.published { background: var(--green); }
+.status-dot.draft { background: var(--muted); }
+.status-text { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; }
+.status-text.published { color: var(--green); }
+.status-text.draft { color: var(--muted); }
+
+/* ── Form ── */
+.form-group { margin-bottom: 20px; }
+.form-label {
+  display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.9px; color: var(--muted); margin-bottom: 7px;
+}
+.form-label span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--subtle); }
+.form-input {
+  width: 100%; padding: 11px 14px;
+  background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 10px; color: var(--text); font-size: 15px; font-family: inherit;
+  transition: border-color .15s, box-shadow .15s; outline: none;
+}
+.form-input:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-dim);
+}
+.form-input::placeholder { color: var(--subtle); }
+
+/* ── File upload row ── */
+.file-upload-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+}
+.file-upload-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: border-color .15s, color .15s; user-select: none;
+}
+.file-upload-label:hover { border-color: var(--orange); color: var(--orange); }
+.file-upload-label input[type="file"] { display: none; }
+.file-upload-hint { font-size: 11px; color: var(--subtle); }
+.file-loaded-name {
+  font-size: 11px; color: var(--green);
+  background: var(--green-dim); border-radius: 6px; padding: 3px 8px;
+}
+
+/* ── Content textarea ── */
+.content-textarea {
+  width: 100%; min-height: 420px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 10px; color: var(--text);
+  font-size: 15px; font-family: inherit; line-height: 1.75;
+  resize: vertical; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.content-textarea:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-dim);
+}
+.content-textarea::placeholder { color: var(--subtle); }
+
+/* ── Word count bar ── */
+.word-meta {
+  display: flex; align-items: center; gap: 16px; margin-top: 8px; flex-wrap: wrap;
+}
+.word-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+.word-meta-item strong { color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ── Action buttons ── */
+.form-divider { height: 1px; background: var(--border); margin: 28px 0; }
+.form-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 24px; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  transition: transform .12s, box-shadow .12s, opacity .2s;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--orange); color: #fff; }
+.btn-primary:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,80,10,0.4); }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border-hi); }
+.btn-secondary:not(:disabled):hover { border-color: var(--orange); color: var(--orange); }
+.btn-outline { background: none; border: 1px solid var(--border-hi); color: var(--muted); }
+.btn-outline:hover { border-color: var(--border-hi); color: var(--text); }
+
+/* ── Spinner ── */
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite;
+}
+.spinner-dark {
+  border-color: rgba(0,0,0,0.15); border-top-color: var(--orange);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 500;
+  z-index: 9999; transition: transform .25s, opacity .25s; pointer-events: none;
+  white-space: nowrap; opacity: 0;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#toast[data-toast-type="success"] { border-color: var(--green); color: var(--green); }
+#toast[data-toast-type="error"]   { border-color: var(--red);   color: var(--red);   }
+#toast[data-toast-type="info"]    { border-color: var(--orange); color: var(--orange); }
+
+/* ── Loading overlay ── */
+.page-loading {
+  display: flex; align-items: center; gap: 10px;
+  padding: 80px 24px; color: var(--muted); font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <a class="topbar-logo" href="kathakar.html">
+    <div class="logo-k">K</div>
+    <span class="logo-text">KathaKar</span>
+  </a>
+  <div class="topbar-right" id="topbar-user" style="display:none">
+    <img class="user-avatar" id="user-avatar" src="" alt="avatar">
+    <span class="user-name" id="user-name-topbar"></span>
+    <button class="sign-out-btn" onclick="doSignOut()">Sign out</button>
+  </div>
+</header>
+
+<!-- ── Auth screen ── -->
+<div id="auth-screen" data-testid="auth-screen">
+  <div class="auth-logo-box">K</div>
+  <h1 class="auth-h1">Katha<em>Kar</em></h1>
+  <p class="auth-sub">Sign in to access Writer Studio and start writing chapters.</p>
+  <button class="google-btn" data-testid="google-signin-btn" onclick="doSignIn()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Continue with Google
+  </button>
+</div>
+
+<!-- ── Main content ── -->
+<div id="main-content">
+  <div class="page">
+
+    <a class="breadcrumb" id="back-link" href="kathakar-write.html">Back to Story</a>
+
+    <h1 class="page-title" id="page-title">Add Chapter</h1>
+    <p class="page-sub" id="page-sub">Write or paste your chapter content below.</p>
+
+    <!-- Status indicator -->
+    <div class="status-indicator" id="status-indicator">
+      <span class="status-dot draft" id="status-dot"></span>
+      <span class="status-text draft" id="status-text">DRAFT</span>
+    </div>
+
+    <!-- Chapter title -->
+    <div class="form-group">
+      <label class="form-label" for="chapter-title-input">Chapter Title <span>*</span></label>
+      <input class="form-input" type="text" id="chapter-title-input" data-testid="chapter-title-input"
+             placeholder="Enter a title for this chapter…" maxlength="200" autocomplete="off">
+    </div>
+
+    <!-- Content + file upload -->
+    <div class="form-group">
+      <label class="form-label">Content <span>*</span></label>
+      <div class="file-upload-row">
+        <label class="file-upload-label" data-testid="file-upload-label" id="file-upload-label">
+          📄 Load from file
+          <input type="file" id="chapter-file-input" accept=".txt,.docx">
+        </label>
+        <span class="file-upload-hint">.txt or .docx — content loads into the editor below</span>
+        <span class="file-loaded-name" id="file-loaded-name" style="display:none"></span>
+      </div>
+      <textarea class="content-textarea" id="chapter-content-textarea" data-testid="chapter-content-textarea"
+                placeholder="Start writing your chapter here, or load a .txt / .docx file above…"
+                oninput="updateWordCount()"></textarea>
+      <div class="word-meta">
+        <div class="word-meta-item">
+          <strong id="word-count" data-testid="word-count">0</strong>
+          <span>words</span>
+        </div>
+        <div class="word-meta-item">
+          ~<strong id="read-time">0</strong>
+          <span>min read</span>
+        </div>
+        <div class="word-meta-item">
+          <strong id="char-count">0</strong>
+          <span>characters</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-divider"></div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" id="publish-btn" data-testid="publish-btn" onclick="saveChapter('PUBLISHED')">
+        Publish Chapter
+      </button>
+      <button class="btn btn-secondary" id="draft-btn" data-testid="draft-btn" onclick="saveChapter('DRAFT')">
+        Save as Draft
+      </button>
+      <button class="btn btn-outline" id="cancel-btn" data-testid="cancel-btn" onclick="goBack()">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" data-testid="toast" data-toast-type="info" role="status" aria-live="polite"></div>
+
+<script>
+// ── Firebase ─────────────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey: "AIzaSyAlBgMkCbsOSqVAj3kcr8WeYCLcagK4B7U",
+  authDomain: "kathakar-8b43a.firebaseapp.com",
+  projectId: "kathakar-8b43a",
+  storageBucket: "kathakar-8b43a.firebasestorage.app",
+  messagingSenderId: "843855541873",
+  appId: "1:843855541873:web:230f1720020e0057ed4dd0"
+});
+const auth     = firebase.auth();
+const db       = firebase.firestore();
+const storage  = firebase.storage();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+// ── State ────────────────────────────────────────────────────────────────────
+let currentUser  = null;
+let storyId      = '';
+let chapterId    = ''; // empty = create mode
+let chapterNum   = 1;
+let storyTitle   = '';
+let currentStatus = 'DRAFT';
+let isSaving     = false;
+
+// Parse URL params on load
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  storyId    = params.get('storyId') || '';
+  chapterId  = params.get('chapterId') || '';
+  chapterNum = parseInt(params.get('chapterNum') || '1', 10) || 1;
+})();
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(function(user) {
+  currentUser = user;
+  if (user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    document.getElementById('topbar-user').style.display = 'flex';
+    document.getElementById('user-avatar').src = user.photoURL || '';
+    document.getElementById('user-name-topbar').textContent = user.displayName || user.email || '';
+    if (!storyId) {
+      showToast('Missing story ID — please go back and try again.', 'error');
+      return;
+    }
+    // Load story metadata (for breadcrumb / title)
+    loadStoryMeta().then(function() {
+      if (chapterId) {
+        loadChapterForEdit();
+      } else {
+        updatePageTitle();
+        updateStatusIndicator('DRAFT');
+      }
+    });
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'none';
+    document.getElementById('topbar-user').style.display = 'none';
+  }
+});
+
+function doSignIn() {
+  auth.signInWithPopup(provider).catch(function(e) { showToast('Sign-in failed: ' + e.message, 'error'); });
+}
+function doSignOut() { auth.signOut(); }
+
+function goBack() {
+  window.location.href = storyId
+    ? 'kathakar-write.html?selected=' + encodeURIComponent(storyId)
+    : 'kathakar-write.html';
+}
+
+// ── Load story metadata ───────────────────────────────────────────────────────
+async function loadStoryMeta() {
+  if (!storyId) return;
+  try {
+    const doc = await db.collection('stories').doc(storyId).get();
+    if (doc.exists) {
+      const s = doc.data();
+      storyTitle = s.title || 'Story';
+      const backLink = document.getElementById('back-link');
+      backLink.textContent = 'Back to ' + storyTitle;
+      backLink.href = 'kathakar-write.html?selected=' + encodeURIComponent(storyId);
+    }
+  } catch (_) {
+    // Non-fatal: breadcrumb just won't have the story title
+  }
+}
+
+// ── Load chapter for edit ─────────────────────────────────────────────────────
+async function loadChapterForEdit() {
+  showToast('Loading chapter…', 'info');
+  try {
+    const doc = await db.collection('episodes').doc(chapterId).get();
+    if (!doc.exists) { showToast('Chapter not found', 'error'); return; }
+    const ep = doc.data();
+    chapterNum = ep.chapterNumber || chapterNum;
+    currentStatus = ep.status || 'DRAFT';
+    document.getElementById('chapter-title-input').value = ep.title || '';
+    document.getElementById('chapter-content-textarea').value = ep.content || '';
+    updateWordCount();
+    updateStatusIndicator(currentStatus);
+    updatePageTitle(ep.title || '');
+  } catch (e) {
+    showToast('Failed to load chapter: ' + e.message, 'error');
+  }
+}
+
+// ── UI updates ────────────────────────────────────────────────────────────────
+function updatePageTitle(epTitle) {
+  var titleEl = document.getElementById('page-title');
+  var subEl   = document.getElementById('page-sub');
+  if (chapterId) {
+    titleEl.textContent = 'Edit: ' + (epTitle || 'Chapter ' + chapterNum);
+    subEl.textContent   = 'Edit your chapter content and save.';
+  } else {
+    titleEl.textContent = 'Chapter ' + chapterNum + (storyTitle ? ' — ' + storyTitle : '');
+    subEl.textContent   = 'Write this chapter, then publish or save as a draft.';
+  }
+}
+
+function updateStatusIndicator(status) {
+  currentStatus = status || 'DRAFT';
+  var dot  = document.getElementById('status-dot');
+  var text = document.getElementById('status-text');
+  var isPub = currentStatus === 'PUBLISHED';
+  dot.className  = 'status-dot '  + (isPub ? 'published' : 'draft');
+  text.className = 'status-text ' + (isPub ? 'published' : 'draft');
+  text.textContent = currentStatus;
+}
+
+// ── Word count ────────────────────────────────────────────────────────────────
+function updateWordCount() {
+  var content = document.getElementById('chapter-content-textarea').value || '';
+  var wordCount = content.trim() ? content.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length : 0;
+  var readTime  = Math.max(1, Math.round(wordCount / 200));
+  var charCount = content.length;
+  document.getElementById('word-count').textContent = wordCount.toLocaleString();
+  document.getElementById('read-time').textContent  = readTime;
+  document.getElementById('char-count').textContent = charCount.toLocaleString();
+}
+
+// ── File loading (txt / docx) ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var fileInput = document.getElementById('chapter-file-input');
+  fileInput.addEventListener('change', function(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    e.target.value = '';
+    if (file.size > 20 * 1024 * 1024) { showToast('File must be under 20 MB', 'error'); return; }
+    var label = document.getElementById('file-upload-label');
+    var origLabelHtml = label.innerHTML;
+    label.innerHTML = '<span class="spinner spinner-dark"></span> Reading… <input type="file" id="chapter-file-input" accept=".txt,.docx" style="display:none">';
+    var name = file.name.toLowerCase();
+    if (name.endsWith('.docx')) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        if (typeof mammoth !== 'undefined') {
+          mammoth.extractRawText({ arrayBuffer: ev.target.result }).then(function(result) {
+            var text = (result.value || '').trim();
+            if (!text) { showToast('Could not extract text from .docx', 'error'); restoreFileLabel(label, origLabelHtml); return; }
+            document.getElementById('chapter-content-textarea').value = text;
+            updateWordCount();
+            showFileLoaded(file.name);
+            restoreFileLabel(label, origLabelHtml);
+            showToast('Word document loaded — review before publishing', 'success');
+          }).catch(function() {
+            showToast('Failed to read .docx file', 'error');
+            restoreFileLabel(label, origLabelHtml);
+          });
+        } else {
+          showToast('mammoth.js not loaded — cannot read .docx files', 'error');
+          restoreFileLabel(label, origLabelHtml);
+        }
+      };
+      reader.onerror = function() { showToast('Could not read file', 'error'); restoreFileLabel(label, origLabelHtml); };
+      reader.readAsArrayBuffer(file);
+    } else {
+      // Plain text
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        document.getElementById('chapter-content-textarea').value = (ev.target.result || '').trim();
+        updateWordCount();
+        showFileLoaded(file.name);
+        restoreFileLabel(label, origLabelHtml);
+        showToast('File loaded — review content before publishing', 'success');
+      };
+      reader.onerror = function() { showToast('Could not read file', 'error'); restoreFileLabel(label, origLabelHtml); };
+      reader.readAsText(file, 'UTF-8');
+    }
+  });
+});
+
+function restoreFileLabel(label, origHtml) {
+  label.innerHTML = origHtml;
+  // Re-attach the file input event listener since innerHTML was replaced
+  var newInput = document.getElementById('chapter-file-input');
+  if (!newInput) return;
+  newInput.addEventListener('change', function(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    e.target.value = '';
+    if (file.size > 20 * 1024 * 1024) { showToast('File must be under 20 MB', 'error'); return; }
+    var lbl = document.getElementById('file-upload-label');
+    var orig = lbl.innerHTML;
+    lbl.innerHTML = '<span class="spinner spinner-dark"></span> Reading…<input type="file" id="chapter-file-input" accept=".txt,.docx" style="display:none">';
+    loadFileIntoTextarea(file, lbl, orig);
+  });
+}
+
+function loadFileIntoTextarea(file, label, origHtml) {
+  var name = file.name.toLowerCase();
+  if (name.endsWith('.docx')) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      if (typeof mammoth !== 'undefined') {
+        mammoth.extractRawText({ arrayBuffer: ev.target.result }).then(function(result) {
+          var text = (result.value || '').trim();
+          if (!text) { showToast('Could not extract text from .docx', 'error'); label.innerHTML = origHtml; return; }
+          document.getElementById('chapter-content-textarea').value = text;
+          updateWordCount();
+          showFileLoaded(file.name);
+          label.innerHTML = origHtml;
+          showToast('Word document loaded', 'success');
+        }).catch(function() { showToast('Failed to read .docx', 'error'); label.innerHTML = origHtml; });
+      } else { showToast('mammoth.js not loaded', 'error'); label.innerHTML = origHtml; }
+    };
+    reader.onerror = function() { showToast('Could not read file', 'error'); label.innerHTML = origHtml; };
+    reader.readAsArrayBuffer(file);
+  } else {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      document.getElementById('chapter-content-textarea').value = (ev.target.result || '').trim();
+      updateWordCount();
+      showFileLoaded(file.name);
+      label.innerHTML = origHtml;
+      showToast('File loaded', 'success');
+    };
+    reader.onerror = function() { showToast('Could not read file', 'error'); label.innerHTML = origHtml; };
+    reader.readAsText(file, 'UTF-8');
+  }
+}
+
+function showFileLoaded(filename) {
+  var nameEl = document.getElementById('file-loaded-name');
+  if (!nameEl) return;
+  var short = filename.length > 28 ? filename.substring(0, 28) + '…' : filename;
+  nameEl.textContent = '📎 ' + short;
+  nameEl.style.display = '';
+}
+
+// ── Save chapter ──────────────────────────────────────────────────────────────
+async function saveChapter(status) {
+  if (isSaving) return;
+  var title   = (document.getElementById('chapter-title-input').value || '').trim();
+  var content = (document.getElementById('chapter-content-textarea').value || '').trim();
+  if (!title)   { showToast('Please enter a chapter title', 'error'); document.getElementById('chapter-title-input').focus(); return; }
+  if (!content) { showToast('Please write some content', 'error'); document.getElementById('chapter-content-textarea').focus(); return; }
+  if (content.length < 100) { showToast('Chapter should be at least 100 characters', 'error'); return; }
+  isSaving = true;
+  var pubBtn   = document.getElementById('publish-btn');
+  var draftBtn = document.getElementById('draft-btn');
+  pubBtn.disabled   = true;
+  draftBtn.disabled = true;
+  if (status === 'PUBLISHED') {
+    pubBtn.innerHTML   = '<span class="spinner"></span> Publishing…';
+  } else {
+    draftBtn.innerHTML = '<span class="spinner"></span> Saving…';
+  }
+  var wordCount    = content.split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+  var readTime     = Math.max(1, Math.round(wordCount / 200));
+  var now          = firebase.firestore.Timestamp.now();
+  try {
+    if (chapterId) {
+      // ── Edit mode ────────────────────────────────────────────────────────────
+      await db.collection('episodes').doc(chapterId).update({
+        title,
+        content,
+        wordCount,
+        readTimeMinutes: readTime,
+        status,
+        updatedAt: now
+      });
+      await db.collection('stories').doc(storyId).update({
+        updatedAt: now
+      });
+      updateStatusIndicator(status);
+      showToast(status === 'PUBLISHED' ? 'Chapter published!' : 'Draft saved!', 'success');
+    } else {
+      // ── Create mode ──────────────────────────────────────────────────────────
+      var epRef  = db.collection('episodes').doc();
+      var newId  = epRef.id;
+      var isFree = chapterNum === 1;
+      await epRef.set({
+        episodeId:       newId,
+        storyId:         storyId,
+        authorId:        currentUser.uid,
+        chapterNumber:   chapterNum,
+        title,
+        content,
+        wordCount,
+        readTimeMinutes: readTime,
+        unlockCostCoins: isFree ? 0 : 10,
+        isFree,
+        status,
+        likesCount:      0,
+        commentsCount:   0,
+        createdAt:       now
+      });
+      // Update story's totalEpisodes and updatedAt
+      await db.collection('stories').doc(storyId).update({
+        totalEpisodes: firebase.firestore.FieldValue.increment(1),
+        updatedAt:     now
+      });
+      updateStatusIndicator(status);
+      showToast(status === 'PUBLISHED' ? 'Chapter published!' : 'Draft saved!', 'success');
+    }
+    // Redirect back to dashboard
+    setTimeout(function() {
+      window.location.href = 'kathakar-write.html?selected=' + encodeURIComponent(storyId);
+    }, 700);
+  } catch (e) {
+    showToast('Save failed: ' + e.message, 'error');
+    pubBtn.disabled   = false;
+    draftBtn.disabled = false;
+    pubBtn.textContent   = 'Publish Chapter';
+    draftBtn.textContent = 'Save as Draft';
+    isSaving = false;
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+var toastTimer;
+function showToast(msg, type) {
+  type = type || 'info';
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.setAttribute('data-toast-type', type);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+</script>
+</body>
+</html>

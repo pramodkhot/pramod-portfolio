@@ -1,277 +1,386 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Publish Your Story — KathaKar</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
-  <style>
-    :root {
-      --orange: #E8500A;
-      --orange-dim: rgba(232,80,10,0.15);
-      --dark: #0E0E0E;
-      --surface: #1A1A1A;
-      --surface2: #242424;
-      --text: #F0EDE8;
-      --muted: #888480;
-      --border: rgba(232,80,10,0.2);
-      --success: #2ECC71;
-      --error: #E74C3C;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { background: var(--dark); color: var(--text); font-family: 'Helvetica Neue', Arial, sans-serif; min-height: 100vh; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writer Studio — KathaKar</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<style>
+:root {
+  --orange:      #E8500A;
+  --orange-hi:   #FF6020;
+  --orange-dim:  rgba(232,80,10,0.12);
+  --orange-dim2: rgba(232,80,10,0.22);
+  --dark:        #0E0E12;
+  --surface:     #17171C;
+  --surface2:    #1F1F28;
+  --surface3:    #272733;
+  --text:        #F0EDE8;
+  --muted:       #8B8799;
+  --subtle:      #5A5768;
+  --border:      rgba(255,255,255,0.07);
+  --border-hi:   rgba(255,255,255,0.14);
+  --green:       #4CAF50;
+  --green-dim:   rgba(76,175,80,0.13);
+  --red:         #EF5350;
+  --red-dim:     rgba(239,83,80,0.12);
+}
 
-    /* ── Topbar ── */
-    .topbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px; height: 60px;
-      background: rgba(14,14,14,0.92); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .topbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .topbar-logo span { font-family: Georgia, serif; font-size: 18px; color: var(--text); }
-    .topbar-logo span em { color: var(--orange); font-style: normal; }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--orange); object-fit: cover; }
-    .user-name { font-size: 13px; color: var(--muted); }
-    .sign-out-btn { padding: 6px 14px; border: 1px solid var(--border); border-radius: 100px; background: none; color: var(--muted); font-size: 12px; cursor: pointer; transition: border-color .2s, color .2s; }
-    .sign-out-btn:hover { border-color: var(--orange); color: var(--orange); }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Helvetica Neue', Arial, system-ui, sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
 
-    /* ── Page wrapper ── */
-    .page { padding: 80px 24px 60px; max-width: 780px; margin: 0 auto; }
+/* ── Topbar ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; height: 56px;
+  background: rgba(14,14,18,0.97); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.logo-k {
+  width: 28px; height: 28px; border-radius: 7px; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: #fff; font-style: italic; flex-shrink: 0;
+}
+.logo-text { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--orange); object-fit: cover; background: var(--surface2); }
+.user-name { font-size: 12px; color: var(--muted); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sign-out-btn {
+  padding: 5px 12px; border: 1px solid var(--border-hi); border-radius: 100px;
+  background: none; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit;
+  transition: border-color .2s, color .2s;
+}
+.sign-out-btn:hover { border-color: var(--orange); color: var(--orange); }
 
-    /* ── Auth screen ── */
-    #auth-screen {
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; text-align: center;
-      padding: 40px 24px;
-    }
-    .auth-logo { width: 80px; height: 80px; border-radius: 20px; margin-bottom: 24px; box-shadow: 0 0 40px rgba(232,80,10,0.4); }
-    .auth-title { font-family: Georgia, serif; font-size: 32px; font-weight: 400; margin-bottom: 12px; }
-    .auth-title span { color: var(--orange); font-style: italic; }
-    .auth-sub { font-size: 15px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; max-width: 400px; }
-    .google-btn {
-      display: inline-flex; align-items: center; gap: 12px;
-      padding: 14px 28px; background: #fff; color: #1a1a1a;
-      border: none; border-radius: 12px; font-size: 15px; font-weight: 500;
-      cursor: pointer; transition: transform .2s, box-shadow .2s;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
-    }
-    .google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(0,0,0,0.4); }
-    .google-btn svg { width: 20px; height: 20px; }
-    .auth-note { margin-top: 20px; font-size: 12px; color: var(--muted); }
+/* ── Auth screen ── */
+#auth-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--dark); text-align: center; padding: 40px 24px;
+}
+.auth-logo-box {
+  width: 72px; height: 72px; border-radius: 18px; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; font-weight: 800; color: #fff; font-style: italic;
+  margin-bottom: 24px; box-shadow: 0 0 48px rgba(232,80,10,0.35);
+}
+.auth-h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.4px; }
+.auth-h1 em { color: var(--orange); font-style: normal; }
+.auth-sub { font-size: 15px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; max-width: 360px; }
+.google-btn {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 13px 28px; background: #fff; color: #111;
+  border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.35); transition: transform .15s, box-shadow .15s; font-family: inherit;
+}
+.google-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 32px rgba(0,0,0,0.45); }
+.google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
 
-    /* ── Steps indicator ── */
-    .steps { display: flex; align-items: center; gap: 0; margin-bottom: 40px; }
-    .step { display: flex; align-items: center; gap: 8px; }
-    .step-num {
-      width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 600; border: 2px solid var(--border);
-      background: var(--surface); color: var(--muted); transition: all .3s;
-    }
-    .step.active .step-num { border-color: var(--orange); background: var(--orange); color: #fff; }
-    .step.done .step-num { border-color: var(--success); background: var(--success); color: #fff; }
-    .step-label { font-size: 13px; color: var(--muted); }
-    .step.active .step-label { color: var(--text); }
-    .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 12px; min-width: 40px; }
+/* ── App layout ── */
+.app-body {
+  display: flex;
+  height: 100vh;
+  padding-top: 56px;
+}
 
-    /* ── Section header ── */
-    .section-head { margin-bottom: 28px; }
-    .section-head h2 { font-family: Georgia, serif; font-size: 26px; font-weight: 400; margin-bottom: 6px; }
-    .section-head p { font-size: 14px; color: var(--muted); }
+/* ── Sidebar ── */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 14px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.brand-k {
+  width: 32px; height: 32px; border-radius: 8px; background: var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; color: #fff; font-style: italic; flex-shrink: 0;
+}
+.brand-text-wrap { display: flex; flex-direction: column; }
+.brand-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--subtle); margin-top: 1px; }
+.sidebar-stories-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px 10px;
+  flex-shrink: 0;
+}
+.sidebar-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.new-story-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 4px 11px; background: var(--orange); color: #fff;
+  border: none; border-radius: 7px; font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: none; transition: background .15s; font-family: inherit;
+}
+.new-story-btn:hover { background: var(--orange-hi); }
+.story-list {
+  flex: 1; overflow-y: auto;
+  padding: 4px 0 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface3) transparent;
+}
+.story-list::-webkit-scrollbar { width: 4px; }
+.story-list::-webkit-scrollbar-track { background: transparent; }
+.story-list::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+.story-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background .12s, border-color .12s;
+  user-select: none;
+}
+.story-item:hover { background: var(--surface2); }
+.story-item.active { background: var(--orange-dim); border-left-color: var(--orange); }
+.story-thumb {
+  width: 34px; height: 46px; border-radius: 5px; flex-shrink: 0;
+  background: var(--surface3); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 800; color: var(--orange);
+}
+.story-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-item-body { min-width: 0; flex: 1; }
+.story-item-title {
+  font-size: 13px; font-weight: 600; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+}
+.story-item-sub { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.story-item-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+.pill {
+  display: inline-block; padding: 2px 7px; border-radius: 100px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.pill-pub  { background: var(--green-dim); color: var(--green); }
+.pill-draft { background: rgba(255,255,255,0.07); color: var(--muted); }
+.pill-lang  { background: var(--orange-dim); color: var(--orange); }
+.sidebar-empty { text-align: center; padding: 40px 16px; color: var(--muted); font-size: 13px; line-height: 1.6; }
 
-    /* ── Form elements ── */
-    .form-group { margin-bottom: 20px; }
-    label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
-    input[type="text"], input[type="email"], textarea, select {
-      width: 100%; padding: 12px 16px; background: var(--surface);
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
-      color: var(--text); font-size: 15px; font-family: inherit;
-      transition: border-color .2s; outline: none;
-    }
-    input:focus, textarea:focus, select:focus { border-color: var(--orange); }
-    textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
-    #ep-content { min-height: 320px; font-size: 16px; }
-    select option { background: #1a1a1a; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 560px) { .form-row { grid-template-columns: 1fr; } }
+/* ── Main panel ── */
+.main-panel {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface3) transparent;
+}
+.main-panel::-webkit-scrollbar { width: 5px; }
+.main-panel::-webkit-scrollbar-track { background: transparent; }
+.main-panel::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
 
-    /* ── Tags ── */
-    .tags-wrap {
-      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-      padding: 10px 12px; background: var(--surface);
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; min-height: 46px;
-    }
-    .tags-wrap:focus-within { border-color: var(--orange); }
-    .tag-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 3px 10px; background: var(--orange-dim); border: 1px solid var(--border);
-      border-radius: 100px; font-size: 12px; color: var(--orange);
-    }
-    .tag-chip button { background: none; border: none; color: var(--orange); cursor: pointer; font-size: 14px; line-height: 1; padding: 0; }
-    .tag-input { border: none; background: none; outline: none; color: var(--text); font-size: 14px; min-width: 120px; flex: 1; }
+/* ── No story placeholder ── */
+.no-story-wrap {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--muted); text-align: center; padding: 48px 24px; gap: 10px;
+}
+.no-story-icon { font-size: 40px; opacity: 0.35; }
+.no-story-wrap p { font-size: 14px; }
 
-    /* ── Cover upload ── */
-    .cover-upload { position: relative; }
-    .cover-drop {
-      border: 2px dashed rgba(255,255,255,0.1); border-radius: 12px;
-      padding: 32px; text-align: center; cursor: pointer;
-      transition: border-color .2s, background .2s;
-    }
-    .cover-drop:hover, .cover-drop.over { border-color: var(--orange); background: var(--orange-dim); }
-    .cover-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .cover-drop-icon { font-size: 32px; margin-bottom: 8px; }
-    .cover-drop p { font-size: 13px; color: var(--muted); }
-    .cover-drop p span { color: var(--orange); }
-    .cover-preview { position: relative; }
-    .cover-preview img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; }
-    .cover-remove { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; color: #fff; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; }
+/* ── Panel topbar (sticky inside main panel) ── */
+.panel-topbar {
+  position: sticky; top: 0; z-index: 10;
+  padding: 14px 24px 12px;
+  background: var(--dark);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-row1 {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px;
+}
+.panel-title-area { min-width: 0; flex: 1; }
+.panel-story-title {
+  font-size: 19px; font-weight: 700; letter-spacing: -0.3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px;
+}
+.panel-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+.panel-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; padding-top: 2px; }
+.panel-row2 { display: flex; align-items: center; gap: 10px; }
+.sort-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+.sort-group {
+  display: flex; border: 1px solid var(--border-hi); border-radius: 7px; overflow: hidden;
+}
+.sort-btn {
+  padding: 4px 12px; background: none; border: none;
+  color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background .12s, color .12s; font-family: inherit;
+}
+.sort-btn + .sort-btn { border-left: 1px solid var(--border-hi); }
+.sort-btn.active { background: var(--orange); color: #fff; }
+.sort-btn:not(.active):hover { background: var(--surface2); color: var(--text); }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 13px; border: 1px solid var(--border-hi); border-radius: 8px;
+  background: none; color: var(--text); font-size: 12px; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: border-color .15s, color .15s; font-family: inherit;
+}
+.btn-ghost:hover { border-color: var(--orange); color: var(--orange); }
+.btn-primary-sm {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 13px; border: none; border-radius: 8px;
+  background: var(--orange); color: #fff; font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: none; transition: background .15s; font-family: inherit;
+}
+.btn-primary-sm:hover { background: var(--orange-hi); }
 
-  /* ── Back button ── */
-  .back-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 24px; transition: color .2s; }
-  .back-btn:hover { color: var(--text); }
+/* ── Table section ── */
+.table-section { padding: 20px 24px 32px; flex: 1; }
+.table-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+}
+.table-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.9px; color: var(--muted); }
+.ch-count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface2); border: 1px solid var(--border-hi); border-radius: 100px;
+  padding: 1px 8px; font-size: 11px; font-weight: 700; color: var(--text); margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.table-wrap { overflow-x: auto; }
+table.ch-table {
+  width: 100%; border-collapse: collapse; min-width: 580px;
+}
+.ch-table thead th {
+  text-align: left; padding: 6px 10px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
+  color: var(--subtle); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.ch-table thead th:first-child { padding-left: 0; }
+.ch-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.4s ease;
+}
+.ch-table tbody tr:last-child { border-bottom: none; }
+.ch-table tbody tr:hover { background: var(--surface2); }
+.ch-table tbody tr.flash-success { background-color: var(--green-dim) !important; }
+.ch-table tbody td { padding: 10px 10px; vertical-align: middle; }
+.ch-table tbody td:first-child { padding-left: 0; }
+.ch-num-badge {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: var(--orange); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
+.title-cell-inner { display: flex; align-items: center; gap: 6px; }
+.ch-title-text { font-size: 13px; font-weight: 500; cursor: default; line-height: 1.3; }
+.ch-title-text:hover { color: var(--orange-hi); }
+.ch-title-input {
+  padding: 4px 8px; background: var(--surface3);
+  border: 1px solid var(--orange); border-radius: 6px;
+  color: var(--text); font-size: 13px; font-family: inherit; outline: none;
+  width: 100%; min-width: 120px;
+}
+.ch-title-input:focus { border-color: var(--orange-hi); box-shadow: 0 0 0 2px var(--orange-dim); }
+.file-tag {
+  display: inline-flex; align-items: center; gap: 2px;
+  font-size: 10px; color: var(--muted); background: var(--surface3);
+  border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0;
+}
+.status-chip {
+  display: inline-block; padding: 2px 8px; border-radius: 100px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
+}
+.chip-pub   { background: var(--green-dim); color: var(--green); }
+.chip-draft { background: rgba(255,255,255,0.07); color: var(--muted); }
+.ch-date { font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ch-words { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.actions-cell { display: flex; align-items: center; gap: 5px; }
+.ch-btn {
+  padding: 4px 9px; border: 1px solid var(--border-hi); border-radius: 6px;
+  background: none; color: var(--muted); font-size: 11px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.ch-btn:hover { border-color: var(--orange); color: var(--orange); }
+.ch-btn.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+.upload-label {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 9px; border: 1px solid var(--border-hi); border-radius: 6px;
+  background: none; color: var(--muted); font-size: 11px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: border-color .15s, color .15s;
+  position: relative;
+}
+.upload-label:hover { border-color: var(--orange); color: var(--orange); }
+.upload-label input[type="file"] { display: none; }
+.table-empty {
+  text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px;
+}
 
-  /* ── File upload for chapter ── */
-  .file-upload-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .file-upload-label { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: var(--surface2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 12px; color: var(--muted); cursor: pointer; transition: border-color .2s, color .2s; }
-  .file-upload-label:hover { border-color: var(--orange); color: var(--orange); }
-  .file-upload-label input { display: none; }
-  .file-upload-hint { font-size: 11px; color: var(--muted); }
+/* ── Loading ── */
+.loading-row td { text-align: center; padding: 40px; }
+.sidebar-loading { text-align: center; padding: 32px 16px; }
 
-    /* ── Word count ── */
-    .ep-meta { display: flex; gap: 16px; margin-top: 8px; }
-    .ep-meta span { font-size: 12px; color: var(--muted); }
-    .ep-meta span strong { color: var(--text); }
+/* ── Spinner ── */
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--orange);
+  border-radius: 50%; animation: spin .6s linear infinite; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Buttons ── */
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 12px 28px; border: none; border-radius: 10px;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: transform .15s, box-shadow .15s, opacity .2s;
-    }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: var(--orange); color: #fff; }
-    .btn-primary:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,80,10,0.4); }
-    .btn-outline { background: none; border: 1px solid var(--border); color: var(--text); }
-    .btn-outline:hover { border-color: var(--orange); color: var(--orange); }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border); }
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 500;
+  z-index: 9999; transition: transform .25s ease, opacity .25s ease; pointer-events: none;
+  white-space: nowrap; opacity: 0;
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+#toast[data-toast-type="success"] { border-color: var(--green); color: var(--green); }
+#toast[data-toast-type="error"]   { border-color: var(--red);   color: var(--red);   }
+#toast[data-toast-type="info"]    { border-color: var(--orange); color: var(--orange); }
 
-    /* ── Episode list ── */
-    .ep-list { margin-bottom: 28px; }
-    .ep-item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px; background: var(--surface); border-radius: 10px;
-      margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05);
-    }
-    .ep-item-left { display: flex; align-items: center; gap: 12px; }
-    .ep-num { width: 28px; height: 28px; background: var(--orange); color: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-    .ep-info .ep-title-text { font-size: 14px; font-weight: 500; }
-    .ep-info .ep-words { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .ep-status { font-size: 11px; padding: 3px 10px; border-radius: 100px; font-weight: 600; }
-    .ep-status.published { background: rgba(46,204,113,0.15); color: var(--success); }
-    .ep-status.draft { background: rgba(255,255,255,0.08); color: var(--muted); }
-
-    /* ── Toast / Alerts ── */
-    #toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-      background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 20px; font-size: 14px; z-index: 999;
-      transition: transform .3s; pointer-events: none; white-space: nowrap;
-    }
-    #toast.show { transform: translateX(-50%) translateY(0); }
-    #toast.success { border-color: var(--success); color: var(--success); }
-    #toast.error { border-color: var(--error); color: var(--error); }
-
-    /* ── Loading spinner ── */
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Publish success ── */
-    #publish-success { text-align: center; padding: 60px 24px; display: none; }
-    .success-icon { font-size: 64px; margin-bottom: 20px; }
-    #publish-success h2 { font-family: Georgia, serif; font-size: 28px; font-weight: 400; margin-bottom: 12px; }
-    #publish-success p { color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
-
-    /* ── Tabs ── */
-    .tabs { display: flex; gap: 4px; margin-bottom: 36px; background: var(--surface); border-radius: 12px; padding: 4px; }
-    .tab-btn { flex: 1; padding: 10px 16px; border: none; border-radius: 9px; background: none; color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer; transition: background .2s, color .2s; font-family: inherit; }
-    .tab-btn.active { background: var(--surface2); color: var(--text); }
-    .tab-btn:hover:not(.active) { color: var(--text); }
-
-    /* ── My Stories ── */
-    #my-stories-panel { display: none; }
-    .stories-empty { text-align: center; padding: 60px 24px; color: var(--muted); }
-    .stories-empty p { margin-top: 12px; font-size: 14px; }
-    .story-card { background: var(--surface); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; margin-bottom: 12px; overflow: hidden; transition: border-color .2s; }
-    .story-card:hover { border-color: var(--border); }
-    .story-card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; }
-    .story-card-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
-    .story-cover-thumb { width: 44px; height: 58px; border-radius: 6px; object-fit: cover; background: var(--surface2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; }
-    .story-cover-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .story-meta { min-width: 0; }
-    .story-meta-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .story-meta-sub { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .story-badge { font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 600; }
-    .story-badge.published { background: rgba(46,204,113,0.15); color: var(--success); }
-    .story-badge.draft { background: rgba(255,255,255,0.08); color: var(--muted); }
-    .story-card-toggle { color: var(--muted); font-size: 18px; flex-shrink: 0; transition: transform .2s; }
-    .story-card.expanded .story-card-toggle { transform: rotate(180deg); }
-    .story-card-body { display: none; border-top: 1px solid rgba(255,255,255,0.05); padding: 16px 20px; }
-    .story-card.expanded .story-card-body { display: block; }
-    .story-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-    .action-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: var(--surface2); color: var(--text); transition: border-color .2s, color .2s; font-family: inherit; }
-    .action-btn:hover { border-color: var(--orange); color: var(--orange); }
-    .action-btn.danger:hover { border-color: var(--error); color: var(--error); }
-    .chapters-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
-    .chapter-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--dark); border-radius: 8px; margin-bottom: 6px; }
-    .chapter-row-left { display: flex; align-items: center; gap: 10px; }
-    .ch-num { width: 24px; height: 24px; background: var(--orange); color: #fff; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
-    .ch-info .ch-title { font-size: 13px; font-weight: 500; }
-    .ch-info .ch-meta { font-size: 11px; color: var(--muted); }
-    .ch-actions { display: flex; gap: 6px; }
-    .ch-btn { padding: 4px 10px; font-size: 11px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: none; color: var(--muted); transition: border-color .2s, color .2s; font-family: inherit; }
-    .ch-btn:hover { border-color: var(--orange); color: var(--orange); }
-    .ch-btn.danger:hover { border-color: var(--error); color: var(--error); }
-    .chapters-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 16px 0; }
-
-    /* ── Edit episode mode ── */
-    .ep-edit-banner { background: rgba(232,80,10,0.1); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; }
-    .ep-edit-banner button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; }
-  </style>
+@media (max-width: 700px) {
+  .sidebar { width: 220px; }
+  .panel-topbar { padding: 12px 14px 10px; }
+  .table-section { padding: 14px 14px 24px; }
+}
+</style>
 </head>
 <body>
 
-<!-- Topbar -->
-<div class="topbar">
+<!-- ── Topbar ── -->
+<header class="topbar">
   <a class="topbar-logo" href="kathakar.html">
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#E8500A"/><text x="14" y="20" text-anchor="middle" fill="white" font-size="16" font-family="Georgia" font-weight="bold">K</text></svg>
-    <span>Katha<em>Kar</em></span>
+    <div class="logo-k">K</div>
+    <span class="logo-text">KathaKar</span>
   </a>
   <div class="topbar-right" id="topbar-user" style="display:none">
-    <img class="user-avatar" id="user-avatar" src="" alt="">
+    <img class="user-avatar" id="user-avatar" src="" alt="avatar">
     <span class="user-name" id="user-name-topbar"></span>
-    <button class="sign-out-btn" onclick="signOut()">Sign out</button>
+    <button class="sign-out-btn" onclick="doSignOut()">Sign out</button>
   </div>
-</div>
+</header>
 
-<!-- Auth Screen -->
-<div id="auth-screen">
-  <svg class="auth-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="80" height="80" rx="20" fill="#E8500A"/>
-    <text x="40" y="56" text-anchor="middle" fill="white" font-size="46" font-family="Georgia" font-weight="bold">K</text>
-  </svg>
-  <h1 class="auth-title">Publish Your <span>Story</span></h1>
-  <p class="auth-sub">Sign in with the same Google account you use on the KathaKar app. Your stories will appear on the app instantly.</p>
-  <button class="google-btn" onclick="signIn()">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<!-- ── Auth screen ── -->
+<div id="auth-screen" data-testid="auth-screen">
+  <div class="auth-logo-box">K</div>
+  <h1 class="auth-h1">Katha<em>Kar</em></h1>
+  <p class="auth-sub">Sign in with your Google account to access Writer Studio and manage your stories.</p>
+  <button class="google-btn" data-testid="google-signin-btn" onclick="doSignIn()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -279,915 +388,524 @@
     </svg>
     Continue with Google
   </button>
-  <p class="auth-note">Only KathaKar users can publish. Your account is verified against the app.</p>
 </div>
 
-<!-- Write Page -->
-<div id="write-screen" style="display:none">
-  <div class="page">
+<!-- ── App layout ── -->
+<div class="app-body" id="app-body" style="display:none">
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-new" onclick="switchTab('new')">✍ Write New Story</button>
-      <button class="tab-btn" id="tab-mystories" onclick="switchTab('mystories')">📚 My Stories <span id="stories-count-badge"></span></button>
-    </div>
-
-    <!-- My Stories Panel -->
-    <div id="my-stories-panel">
-      <div id="stories-list"></div>
-    </div>
-
-    <!-- New Story Flow -->
-    <div id="new-story-flow">
-
-    <!-- Steps -->
-    <div class="steps">
-      <div class="step active" id="step-1-indicator">
-        <div class="step-num">1</div>
-        <div class="step-label">Story Details</div>
-      </div>
-      <div class="step-line"></div>
-      <div class="step" id="step-2-indicator">
-        <div class="step-num">2</div>
-        <div class="step-label">Add Episodes</div>
-      </div>
-      <div class="step-line"></div>
-      <div class="step" id="step-3-indicator">
-        <div class="step-num">3</div>
-        <div class="step-label">Publish</div>
+  <!-- Sidebar -->
+  <aside class="sidebar" data-testid="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-k">K</div>
+      <div class="brand-text-wrap">
+        <span class="brand-name">KathaKar</span>
+        <span class="brand-sub">Writer Studio</span>
       </div>
     </div>
+    <div class="sidebar-stories-head">
+      <span class="sidebar-label">My Stories (<span id="stories-count">0</span>)</span>
+      <a class="new-story-btn" href="kathakar-edit-story.html" data-testid="new-story-btn">+ New</a>
+    </div>
+    <div class="story-list" id="story-list" data-testid="story-list">
+      <div class="sidebar-loading"><span class="spinner"></span></div>
+    </div>
+  </aside>
 
-    <!-- Step 1: Story Details -->
-    <div id="step-story">
-      <div class="section-head">
-        <h2>Tell us about your story</h2>
-        <p>Fill in the details below. You can edit these later from the app.</p>
-      </div>
+  <!-- Main panel -->
+  <main class="main-panel" id="main-panel" data-testid="main-panel">
 
-      <div class="form-group">
-        <label>Story Title *</label>
-        <input type="text" id="story-title" placeholder="Give your story a compelling title..." maxlength="100">
-      </div>
+    <!-- No story placeholder -->
+    <div class="no-story-wrap" id="no-story-wrap">
+      <div class="no-story-icon">📖</div>
+      <p>Select a story from the sidebar to view its chapters.</p>
+    </div>
 
-      <div class="form-group">
-        <label>Description *</label>
-        <textarea id="story-desc" placeholder="What is your story about? Hook the reader in 2-3 sentences..." rows="4"></textarea>
-      </div>
+    <!-- Story content (shown when a story is selected) -->
+    <div id="story-content" style="display:none; flex-direction:column; flex:1">
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Category *</label>
-          <select id="story-category">
-            <option value="">Select category</option>
-            <option>Romance</option><option>Thriller</option><option>Fantasy</option>
-            <option>Horror</option><option>Drama</option><option>Comedy</option>
-            <option>Mystery</option><option>Sci-Fi</option><option>Historical</option>
-            <option>Mythology</option><option>Devotional</option><option>Biography</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Language *</label>
-          <select id="story-language">
-            <option value="">Select language</option>
-            <option value="en">English</option>
-            <option value="hi">Hindi</option>
-            <option value="mr">Marathi</option>
-            <option value="ta">Tamil</option>
-            <option value="te">Telugu</option>
-            <option value="bn">Bengali</option>
-            <option value="gu">Gujarati</option>
-            <option value="kn">Kannada</option>
-            <option value="pa">Punjabi</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Tags <span style="font-weight:400;text-transform:none;letter-spacing:0">(press Enter or comma to add)</span></label>
-        <div class="tags-wrap" id="tags-wrap" onclick="document.getElementById('tag-input').focus()">
-          <input type="text" class="tag-input" id="tag-input" placeholder="slowburn, romance, thriller...">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Cover Image <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — recommended 3:4 ratio)</span></label>
-        <div class="cover-upload">
-          <div class="cover-drop" id="cover-drop">
-            <input type="file" id="cover-file" accept="image/*" onchange="onCoverSelected(event)">
-            <div class="cover-drop-icon">🖼️</div>
-            <p>Drag & drop or <span>browse</span> to upload cover</p>
-            <p style="margin-top:6px;font-size:11px">JPG, PNG — max 5MB</p>
+      <!-- Panel topbar -->
+      <div class="panel-topbar">
+        <div class="panel-row1">
+          <div class="panel-title-area">
+            <div class="panel-story-title" id="panel-story-title" data-testid="main-story-title">Story Title</div>
+            <div class="panel-pills" id="panel-pills"></div>
           </div>
-          <div class="cover-preview" id="cover-preview" style="display:none">
-            <img id="cover-img-preview" src="" alt="Cover preview">
-            <button class="cover-remove" onclick="removeCover()" title="Remove">✕</button>
+          <div class="panel-actions">
+            <a class="btn-ghost" id="edit-story-btn" data-testid="edit-story-btn" href="#">⚙ Edit Story</a>
+            <a class="btn-primary-sm" id="add-chapter-btn" data-testid="add-chapter-btn" href="#">+ Add Chapter</a>
+          </div>
+        </div>
+        <div class="panel-row2">
+          <span class="sort-label">Sort:</span>
+          <div class="sort-group">
+            <button class="sort-btn active" id="sort-chapter-btn" data-testid="sort-by-chapter" onclick="setSortMode('chapter')">Ch #</button>
+            <button class="sort-btn" id="sort-date-btn" data-testid="sort-by-date" onclick="setSortMode('date')">Date ↓</button>
           </div>
         </div>
       </div>
 
-      <div class="btn-actions">
-        <button class="btn btn-primary" id="save-story-btn" onclick="saveStory()">
-          Save & Add Episodes →
-        </button>
-      </div>
-    </div>
-
-    <!-- Step 2: Episodes -->
-    <div id="step-episodes" style="display:none">
-      <button class="back-btn" onclick="goBackToStory()">← Back to Story Details</button>
-      <div class="section-head">
-        <h2 id="episodes-heading">Add Episodes</h2>
-        <p id="episodes-sub">Chapter 1 is always free. Subsequent chapters can be unlocked with coins.</p>
-      </div>
-
-      <!-- Existing episodes list -->
-      <div class="ep-list" id="ep-list"></div>
-
-      <!-- Episode form -->
-      <div id="ep-form">
-        <div class="form-group">
-          <label id="ep-chapter-label">Chapter <span id="ep-chapter-num">1</span> — Title *</label>
-          <input type="text" id="ep-title" placeholder="Chapter title...">
+      <!-- Table section -->
+      <div class="table-section">
+        <div class="table-header">
+          <span class="table-title">Chapters <span class="ch-count-badge" id="chapter-count" data-testid="chapter-count">0</span></span>
         </div>
-        <div class="form-group">
-          <label>Content *</label>
-          <div class="file-upload-row">
-            <label class="file-upload-label">
-              📄 Upload from file
-              <input type="file" accept=".txt,.docx" onchange="loadChapterFile(event)">
-            </label>
-            <span class="file-upload-hint">.txt or .docx — content will load into the editor below</span>
-          </div>
-          <textarea id="ep-content" placeholder="Start writing your chapter here, or upload a .txt file above..." oninput="updateWordCount()"></textarea>
-          <div class="ep-meta">
-            <span><strong id="word-count">0</strong> words</span>
-            <span>~<strong id="read-time">0</strong> min read</span>
-          </div>
-        </div>
-
-        <div class="btn-actions">
-          <button class="btn btn-primary" id="publish-ep-btn" onclick="saveEpisode('PUBLISHED')">
-            Publish Chapter
-          </button>
-          <button class="btn btn-outline" onclick="saveEpisode('DRAFT')">
-            Save as Draft
-          </button>
-          <button class="btn btn-success" id="publish-story-btn" onclick="publishStory()" style="margin-left:auto">
-            🚀 Publish Story
-          </button>
+        <div class="table-wrap">
+          <table class="ch-table" data-testid="chapters-table">
+            <thead>
+              <tr>
+                <th style="width:38px">#</th>
+                <th>Title</th>
+                <th style="width:70px">Words</th>
+                <th style="width:100px">Status</th>
+                <th style="width:110px">Date</th>
+                <th style="width:230px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="chapters-tbody">
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
 
-    <!-- Step 3: Success -->
-    <div id="publish-success">
-      <div class="success-icon">🎉</div>
-      <h2>Your story is live!</h2>
-      <p>It will appear on the KathaKar app within a few seconds.<br>Open the app and check your Write tab to manage it.</p>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="writeAnother()">Write Another Story</button>
-        <button class="btn btn-outline" onclick="switchTab('mystories')">View My Stories</button>
-        <a class="btn btn-outline" href="https://play.google.com/store/apps/details?id=com.pramodkhot.kathakar" target="_blank">Open App</a>
-      </div>
-    </div>
+    </div><!-- /story-content -->
+  </main>
 
-    </div><!-- end #new-story-flow -->
-  </div>
-</div>
+</div><!-- /app-body -->
 
 <!-- Toast -->
-<div id="toast"></div>
+<div id="toast" data-testid="toast" data-toast-type="info" role="status" aria-live="polite"></div>
 
 <script>
-  // ── Firebase init ──────────────────────────────────────────────────────────────
-  const firebaseConfig = {
-    apiKey: "AIzaSyAlBgMkCbsOSqVAj3kcr8WeYCLcagK4B7U",
-    authDomain: "kathakar-8b43a.firebaseapp.com",
-    projectId: "kathakar-8b43a",
-    storageBucket: "kathakar-8b43a.firebasestorage.app",
-    messagingSenderId: "843855541873",
-    appId: "1:843855541873:web:230f1720020e0057ed4dd0",
-    measurementId: "G-WSY6MZTTXB"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth     = firebase.auth();
-  const db       = firebase.firestore();
-  const storage  = firebase.storage();
-  const provider = new firebase.auth.GoogleAuthProvider();
+// ── Firebase ─────────────────────────────────────────────────────────────────
+firebase.initializeApp({
+  apiKey: "AIzaSyAlBgMkCbsOSqVAj3kcr8WeYCLcagK4B7U",
+  authDomain: "kathakar-8b43a.firebaseapp.com",
+  projectId: "kathakar-8b43a",
+  storageBucket: "kathakar-8b43a.firebasestorage.app",
+  messagingSenderId: "843855541873",
+  appId: "1:843855541873:web:230f1720020e0057ed4dd0"
+});
+const auth     = firebase.auth();
+const db       = firebase.firestore();
+const storage  = firebase.storage();
+const provider = new firebase.auth.GoogleAuthProvider();
 
-  // ── State ──────────────────────────────────────────────────────────────────────
-  let currentUser = null;
-  let currentStoryId = null;
-  let currentChapter = 1;
-  let savedEpisodes = [];
-  let coverFile = null;
-  let tags = [];
-  let editingExistingStory = false;
+// ── State ────────────────────────────────────────────────────────────────────
+let currentUser    = null;
+let stories        = [];
+let selectedStoryId = null;
+let chapters       = [];
+let sortMode       = 'chapter'; // 'chapter' | 'date'
+let editingChId    = null;
 
-  // ── Auth ───────────────────────────────────────────────────────────────────────
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('write-screen').style.display = 'block';
-      document.getElementById('topbar-user').style.display = 'flex';
-      document.getElementById('user-avatar').src = user.photoURL || '';
-      document.getElementById('user-name-topbar').textContent = user.displayName || '';
-      // Pre-load story count for My Stories badge
-      db.collection('stories').where('authorId', '==', user.uid).get()
-        .then(s => { document.getElementById('stories-count-badge').textContent = s.size ? `(${s.size})` : ''; })
-        .catch(() => {});
-    } else {
-      currentUser = null;
-      document.getElementById('auth-screen').style.display = 'flex';
-      document.getElementById('write-screen').style.display = 'none';
-      document.getElementById('topbar-user').style.display = 'none';
+const LANG_MAP = { en:'EN', hi:'HI', mr:'MR', ta:'TA', te:'TE', bn:'BN', gu:'GU', kn:'KN', pa:'PA' };
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(function(user) {
+  currentUser = user;
+  if (user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-body').style.display = 'flex';
+    document.getElementById('topbar-user').style.display = 'flex';
+    document.getElementById('user-avatar').src = user.photoURL || '';
+    document.getElementById('user-name-topbar').textContent = user.displayName || user.email || '';
+    loadStories();
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app-body').style.display = 'none';
+    document.getElementById('topbar-user').style.display = 'none';
+  }
+});
+
+function doSignIn() {
+  auth.signInWithPopup(provider).catch(function(e) { showToast('Sign-in failed: ' + e.message, 'error'); });
+}
+function doSignOut() { auth.signOut(); }
+
+// ── Load stories ─────────────────────────────────────────────────────────────
+async function loadStories() {
+  var listEl = document.getElementById('story-list');
+  listEl.innerHTML = '<div class="sidebar-loading"><span class="spinner"></span></div>';
+  try {
+    var snap = await db.collection('stories').where('authorId', '==', currentUser.uid).get();
+    stories = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    stories.sort(function(a, b) {
+      return ((b.updatedAt && b.updatedAt.seconds) || 0) - ((a.updatedAt && a.updatedAt.seconds) || 0);
+    });
+    document.getElementById('stories-count').textContent = stories.length;
+    renderStoryList();
+    // Auto-select from URL param
+    var urlParam = new URLSearchParams(window.location.search).get('selected');
+    if (urlParam && stories.find(function(s) { return s.id === urlParam; })) {
+      selectStory(urlParam);
+    } else if (stories.length > 0) {
+      selectStory(stories[0].id);
+    }
+  } catch (e) {
+    listEl.innerHTML = '<div class="sidebar-empty" style="color:var(--red)">Failed to load stories.<br>' + escHtml(e.message) + '</div>';
+  }
+}
+
+function renderStoryList() {
+  var listEl = document.getElementById('story-list');
+  if (stories.length === 0) {
+    listEl.innerHTML = '<div class="sidebar-empty">No stories yet.<br>Click <strong>+ New</strong> to start writing.</div>';
+    return;
+  }
+  listEl.innerHTML = stories.map(function(s) {
+    var initial = s.title ? s.title.charAt(0).toUpperCase() : '?';
+    var thumbInner = s.coverUrl
+      ? '<img src="' + escAttr(s.coverUrl) + '" alt="" onerror="this.style.display=\'none\'">'
+      : escHtml(initial);
+    var lang = LANG_MAP[s.language] || (s.language || '').toUpperCase().substring(0,2);
+    var statusClass = s.status === 'PUBLISHED' ? 'pill-pub' : 'pill-draft';
+    var isActive = s.id === selectedStoryId ? ' active' : '';
+    var totalEp = s.totalEpisodes || 0;
+    return '<div class="story-item' + isActive + '" data-testid="story-item" data-story-id="' + escAttr(s.id) + '" onclick="selectStory(\'' + escAttr(s.id) + '\')" role="button" tabindex="0">'
+      + '<div class="story-thumb">' + thumbInner + '</div>'
+      + '<div class="story-item-body">'
+      + '<div class="story-item-title">' + escHtml(s.title || 'Untitled') + '</div>'
+      + '<div class="story-item-sub">' + totalEp + ' ch &middot; ' + escHtml(s.category || '') + '</div>'
+      + '<div class="story-item-pills">'
+      + '<span class="pill ' + statusClass + '">' + escHtml(s.status || 'DRAFT') + '</span>'
+      + (lang ? '<span class="pill pill-lang">' + escHtml(lang) + '</span>' : '')
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ── Select story ─────────────────────────────────────────────────────────────
+async function selectStory(storyId) {
+  selectedStoryId = storyId;
+  // Update active state in sidebar
+  document.querySelectorAll('.story-item').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.storyId === storyId);
+  });
+  var story = stories.find(function(s) { return s.id === storyId; });
+  if (!story) return;
+  // Show content panel
+  document.getElementById('no-story-wrap').style.display = 'none';
+  var sc = document.getElementById('story-content');
+  sc.style.display = 'flex';
+  // Update panel topbar
+  document.getElementById('panel-story-title').textContent = story.title || 'Untitled';
+  var lang = LANG_MAP[story.language] || (story.language || '').toUpperCase().substring(0,2);
+  var statusClass = story.status === 'PUBLISHED' ? 'pill-pub' : 'pill-draft';
+  document.getElementById('panel-pills').innerHTML =
+    '<span class="pill ' + statusClass + '">' + escHtml(story.status || 'DRAFT') + '</span>'
+    + (lang ? ' <span class="pill pill-lang">' + escHtml(lang) + '</span>' : '');
+  document.getElementById('edit-story-btn').href = 'kathakar-edit-story.html?storyId=' + encodeURIComponent(storyId);
+  // Load chapters
+  await loadChapters(storyId);
+}
+
+// ── Load chapters ────────────────────────────────────────────────────────────
+async function loadChapters(storyId) {
+  var tbody = document.getElementById('chapters-tbody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="6"><span class="spinner"></span></td></tr>';
+  document.getElementById('chapter-count').textContent = '…';
+  try {
+    var snap = await db.collection('episodes').where('storyId', '==', storyId).get();
+    chapters = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    document.getElementById('chapter-count').textContent = chapters.length;
+    renderChaptersTable();
+    // Update Add Chapter button with correct next chapter number
+    var maxNum = 0;
+    chapters.forEach(function(c) { if ((c.chapterNumber || 0) > maxNum) maxNum = c.chapterNumber || 0; });
+    var nextNum = maxNum + 1;
+    document.getElementById('add-chapter-btn').href =
+      'kathakar-add-chapter.html?storyId=' + encodeURIComponent(storyId) + '&chapterNum=' + nextNum;
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--red)">Failed to load chapters: ' + escHtml(e.message) + '</td></tr>';
+  }
+}
+
+// ── Render chapters table ────────────────────────────────────────────────────
+function renderChaptersTable() {
+  var tbody = document.getElementById('chapters-tbody');
+  if (chapters.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="table-empty">No chapters yet. Click <strong>+ Add Chapter</strong> to start writing.</td></tr>';
+    return;
+  }
+  var sorted = sortChapters(chapters.slice());
+  tbody.innerHTML = sorted.map(function(ep) {
+    var statusClass = ep.status === 'PUBLISHED' ? 'chip-pub' : 'chip-draft';
+    var dateStr = formatDate(ep.createdAt);
+    var fileTag = ep.fileUrl ? '<span class="file-tag" title="' + escAttr(ep.fileName || '') + '">&#128206; ' + escHtml(ep.fileName ? ep.fileName.substring(0,10) + (ep.fileName.length > 10 ? '…' : '') : 'File') + '</span>' : '';
+    var uploadText = ep.fileUrl
+      ? ('&#128206; ' + escHtml((ep.fileName || 'File').substring(0,12) + ((ep.fileName||'').length > 12 ? '…' : '')))
+      : '&#128206; Upload';
+    return '<tr data-testid="chapter-row" data-chapter-id="' + escAttr(ep.id) + '" data-chapter-num="' + escAttr(String(ep.chapterNumber || '')) + '">'
+      + '<td><div class="ch-num-badge">' + escHtml(String(ep.chapterNumber || '?')) + '</div></td>'
+      + '<td style="max-width:200px">'
+        + '<div class="title-cell-inner">'
+          + '<span class="ch-title-text" data-testid="chapter-title-text" data-rename-id="' + escAttr(ep.id) + '">' + escHtml(ep.title || 'Untitled') + '</span>'
+          + '<input class="ch-title-input" data-testid="chapter-title-input" type="text" value="' + escAttr(ep.title || '') + '" style="display:none" aria-label="Chapter title">'
+          + fileTag
+        + '</div>'
+      + '</td>'
+      + '<td class="ch-words">' + (ep.wordCount || 0).toLocaleString() + '</td>'
+      + '<td><span class="status-chip ' + statusClass + '">' + escHtml(ep.status || 'DRAFT') + '</span></td>'
+      + '<td class="ch-date">' + dateStr + '</td>'
+      + '<td>'
+        + '<div class="actions-cell">'
+          + '<label class="upload-label" data-testid="chapter-upload-btn" id="upload-label-' + escAttr(ep.id) + '">'
+            + uploadText
+            + '<input type="file" accept=".txt,.doc,.docx,.pdf,.rtf,.md" onchange="handleFileSelect(event,\'' + escAttr(ep.id) + '\')">'
+          + '</label>'
+          + '<a class="ch-btn" data-testid="chapter-edit-btn" href="kathakar-add-chapter.html?storyId=' + escAttr(selectedStoryId || '') + '&chapterId=' + escAttr(ep.id) + '">Edit</a>'
+          + '<button class="ch-btn danger" data-testid="chapter-delete-btn" onclick="deleteChapter(\'' + escAttr(ep.id) + '\',' + (ep.chapterNumber || 0) + ')">Delete</button>'
+        + '</div>'
+      + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+function sortChapters(arr) {
+  if (sortMode === 'date') {
+    return arr.sort(function(a, b) {
+      return ((b.createdAt && b.createdAt.seconds) || 0) - ((a.createdAt && a.createdAt.seconds) || 0);
+    });
+  }
+  return arr.sort(function(a, b) {
+    return (a.chapterNumber || 0) - (b.chapterNumber || 0);
+  });
+}
+
+function setSortMode(mode) {
+  sortMode = mode;
+  document.getElementById('sort-chapter-btn').classList.toggle('active', mode === 'chapter');
+  document.getElementById('sort-date-btn').classList.toggle('active', mode === 'date');
+  renderChaptersTable();
+}
+
+// ── Inline rename (event delegation on tbody) ─────────────────────────────────
+(function setupRenameListeners() {
+  var tbody = document.getElementById('chapters-tbody');
+
+  // dblclick → start edit
+  tbody.addEventListener('dblclick', function(e) {
+    var textEl = e.target.closest('[data-testid="chapter-title-text"]');
+    if (!textEl) return;
+    var row = textEl.closest('[data-testid="chapter-row"]');
+    var chId = row && row.dataset.chapterId;
+    if (!chId) return;
+    startInlineEdit(chId, textEl, row);
+  });
+
+  // keydown on input → Enter=save, Escape=cancel
+  tbody.addEventListener('keydown', function(e) {
+    var inputEl = e.target.closest('[data-testid="chapter-title-input"]');
+    if (!inputEl) return;
+    var row = inputEl.closest('[data-testid="chapter-row"]');
+    var chId = row && row.dataset.chapterId;
+    if (!chId) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (editingChId === chId) {
+        editingChId = null; // reset guard BEFORE save to prevent blur double-save
+        commitRename(chId, inputEl, row);
+      }
+    } else if (e.key === 'Escape') {
+      cancelInlineEdit(chId, inputEl, row);
     }
   });
 
-  function signIn() {
-    auth.signInWithPopup(provider).catch(e => toast('Sign-in failed: ' + e.message, 'error'));
-  }
-  function signOut() {
-    auth.signOut();
-  }
-
-  // ── Tags ───────────────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    const tagInput = document.getElementById('tag-input');
-    tagInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        addTag(tagInput.value.trim().replace(/,/g,''));
-        tagInput.value = '';
-      }
-      if (e.key === 'Backspace' && tagInput.value === '' && tags.length) {
-        removeTag(tags[tags.length - 1]);
-      }
-    });
+  // focusout (bubbles) on input → save if guard matches
+  tbody.addEventListener('focusout', function(e) {
+    var inputEl = e.target.closest('[data-testid="chapter-title-input"]');
+    if (!inputEl) return;
+    var row = inputEl.closest('[data-testid="chapter-row"]');
+    var chId = row && row.dataset.chapterId;
+    if (!chId) return;
+    if (editingChId === chId) {
+      editingChId = null;
+      commitRename(chId, inputEl, row);
+    }
   });
+})();
 
-  function addTag(val) {
-    const tag = val.toLowerCase().replace(/[^a-z0-9ऀ-ॿঀ-৿஀-௿ఀ-౿ಀ-೿઀-૿-]/g,'');
-    if (!tag || tags.includes(tag) || tags.length >= 5) return;
-    tags.push(tag);
-    renderTags();
+function startInlineEdit(chId, textEl, row) {
+  if (editingChId && editingChId !== chId) {
+    // Cancel existing edit
+    var oldRow = findChapterRow(editingChId);
+    if (oldRow) {
+      var oldInput = oldRow.querySelector('[data-testid="chapter-title-input"]');
+      var oldText  = oldRow.querySelector('[data-testid="chapter-title-text"]');
+      if (oldInput) { oldInput.style.display = 'none'; oldInput.blur(); }
+      if (oldText)  oldText.style.display = '';
+    }
+    editingChId = null;
   }
+  editingChId = chId;
+  var inputEl = row.querySelector('[data-testid="chapter-title-input"]');
+  if (!inputEl) return;
+  inputEl.value = textEl.textContent.trim();
+  textEl.style.display = 'none';
+  inputEl.style.display = '';
+  inputEl.focus();
+  inputEl.select();
+}
 
-  function removeTag(tag) {
-    tags = tags.filter(t => t !== tag);
-    renderTags();
+async function commitRename(chId, inputEl, row) {
+  var textEl = row.querySelector('[data-testid="chapter-title-text"]');
+  var newTitle = (inputEl.value || '').trim();
+  // Always restore display
+  inputEl.style.display = 'none';
+  if (textEl) textEl.style.display = '';
+  if (!newTitle) return;
+  if (textEl && newTitle === textEl.textContent.trim()) return; // no change
+  try {
+    await db.collection('episodes').doc(chId).update({ title: newTitle });
+    if (textEl) textEl.textContent = newTitle;
+    // Update local state
+    var ch = chapters.find(function(c) { return c.id === chId; });
+    if (ch) ch.title = newTitle;
+    // Flash green
+    row.classList.add('flash-success');
+    setTimeout(function() { row.classList.remove('flash-success'); }, 1400);
+    row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    showToast('Chapter renamed', 'success');
+  } catch (e) {
+    showToast('Rename failed: ' + e.message, 'error');
   }
+}
 
-  function renderTags() {
-    const wrap = document.getElementById('tags-wrap');
-    wrap.querySelectorAll('.tag-chip').forEach(el => el.remove());
-    tags.forEach(tag => {
-      const chip = document.createElement('span');
-      chip.className = 'tag-chip';
-      chip.innerHTML = `#${tag} <button onclick="removeTag('${tag}')">×</button>`;
-      wrap.insertBefore(chip, document.getElementById('tag-input'));
+function cancelInlineEdit(chId, inputEl, row) {
+  editingChId = null;
+  var textEl = row.querySelector('[data-testid="chapter-title-text"]');
+  if (inputEl) inputEl.style.display = 'none';
+  if (textEl)  textEl.style.display = '';
+}
+
+function findChapterRow(chId) {
+  var rows = document.querySelectorAll('[data-testid="chapter-row"]');
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].dataset.chapterId === chId) return rows[i];
+  }
+  return null;
+}
+
+// ── File upload (per chapter row) ─────────────────────────────────────────────
+function handleFileSelect(e, epId) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  e.target.value = '';
+  uploadChapterFile(file, epId);
+}
+
+async function uploadChapterFile(file, epId) {
+  var labelEl = document.getElementById('upload-label-' + epId);
+  if (!labelEl) return;
+  if (file.size > 20 * 1024 * 1024) { showToast('File must be under 20MB', 'error'); return; }
+  // Show spinner in label
+  labelEl.innerHTML = '<span class="spinner" style="border-top-color:#fff"></span> Uploading…'
+    + '<input type="file" accept=".txt,.doc,.docx,.pdf,.rtf,.md" onchange="handleFileSelect(event,\'' + escAttr(epId) + '\')">';
+  try {
+    var ref = storage.ref('chapter_files/' + epId + '/' + file.name);
+    await ref.put(file);
+    var url = await ref.getDownloadURL();
+    await db.collection('episodes').doc(epId).update({
+      fileUrl: url,
+      fileName: file.name,
+      fileUploadedAt: firebase.firestore.Timestamp.now()
     });
-  }
-
-  // ── Cover ──────────────────────────────────────────────────────────────────────
-  function onCoverSelected(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast('Image must be under 5MB', 'error'); return; }
-    coverFile = file;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      document.getElementById('cover-img-preview').src = ev.target.result;
-      document.getElementById('cover-drop').style.display = 'none';
-      document.getElementById('cover-preview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function removeCover() {
-    coverFile = null;
-    document.getElementById('cover-file').value = '';
-    document.getElementById('cover-drop').style.display = 'block';
-    document.getElementById('cover-preview').style.display = 'none';
-  }
-
-  // ── Word count ────────────────────────────────────────────────────────────────
-  function updateWordCount() {
-    const content = document.getElementById('ep-content').value.trim();
-    const words = content ? content.split(/\s+/).filter(w => w).length : 0;
-    const readMin = Math.max(1, Math.round(words / 200));
-    document.getElementById('word-count').textContent = words;
-    document.getElementById('read-time').textContent = readMin;
-  }
-
-  // ── Search tokens (mirrors Android generateSearchTokens) ─────────────────────
-  function generateSearchTokens(title, authorName) {
-    const tokens = new Set();
-    [title, authorName].forEach(str => {
-      str.toLowerCase().split(/\s+/).forEach(word => {
-        if (word.length >= 2) {
-          for (let i = 2; i <= word.length; i++) tokens.add(word.substring(0, i));
-        }
-      });
-    });
-    return Array.from(tokens);
-  }
-
-  // ── Save Story ────────────────────────────────────────────────────────────────
-  async function saveStory() {
-    const title    = document.getElementById('story-title').value.trim();
-    const desc     = document.getElementById('story-desc').value.trim();
-    const category = document.getElementById('story-category').value;
-    const language = document.getElementById('story-language').value;
-
-    if (!title)    { toast('Please enter a story title', 'error'); return; }
-    if (!desc)     { toast('Please enter a description', 'error'); return; }
-    if (!category) { toast('Please select a category', 'error'); return; }
-    if (!language) { toast('Please select a language', 'error'); return; }
-
-    const btn = document.getElementById('save-story-btn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Saving...';
-
-    try {
-      const storyRef = currentStoryId
-        ? db.collection('stories').doc(currentStoryId)
-        : db.collection('stories').doc();
-
-      currentStoryId = storyRef.id;
-      const authorName = currentUser.displayName || '';
-      const tokens = generateSearchTokens(title, authorName);
-
-      let coverUrl = '';
-
-      // Upload cover if selected
-      if (coverFile) {
-        toast('Uploading cover image...');
-        const ref = storage.ref(`story_covers/${currentStoryId}.jpg`);
-        await ref.put(coverFile);
-        coverUrl = await ref.getDownloadURL();
+    // Update local state
+    var ch = chapters.find(function(c) { return c.id === epId; });
+    if (ch) { ch.fileUrl = url; ch.fileName = file.name; }
+    // Update label text
+    var shortName = file.name.length > 12 ? file.name.substring(0, 12) + '…' : file.name;
+    labelEl.innerHTML = '&#128206; ' + escHtml(shortName)
+      + '<input type="file" accept=".txt,.doc,.docx,.pdf,.rtf,.md" onchange="handleFileSelect(event,\'' + escAttr(epId) + '\')">';
+    // Update file tag in title cell
+    var row = findChapterRow(epId);
+    if (row) {
+      var titleCell = row.querySelector('.title-cell-inner');
+      var existing = titleCell && titleCell.querySelector('.file-tag');
+      if (!existing && titleCell) {
+        var ft = document.createElement('span');
+        ft.className = 'file-tag';
+        ft.title = file.name;
+        ft.textContent = '📎 File';
+        titleCell.appendChild(ft);
+      } else if (existing) {
+        existing.title = file.name;
+        existing.textContent = '📎 ' + (file.name.length > 10 ? file.name.substring(0,10)+'…' : file.name);
       }
-
-      const now = firebase.firestore.Timestamp.now();
-
-      if (editingExistingStory) {
-        // Update only the editable fields — preserve totalEpisodes, reads, ratings, etc.
-        const updateData = { title, description: desc, category, language, tags, searchTokens: tokens, updatedAt: now };
-        if (coverUrl) updateData.coverUrl = coverUrl;
-        await storyRef.update(updateData);
-        editingExistingStory = false;
-        document.getElementById('save-story-btn').textContent = 'Save & Continue →';
-        toast('Story details updated!', 'success');
-        // Go back to My Stories after updating
-        switchTab('mystories');
-        return;
-      } else {
-        await storyRef.set({
-          storyId:       currentStoryId,
-          title,
-          description:   desc,
-          coverUrl,
-          authorId:      currentUser.uid,
-          authorName,
-          category,
-          language,
-          tags,
-          searchTokens:  tokens,
-          status:        'DRAFT',
-          totalEpisodes: 0,
-          totalReads:    0,
-          avgRating:     0,
-          totalRatings:  0,
-          createdAt:     now,
-          updatedAt:     now
-        });
-
-        // Increment storiesCount in user doc (ignore if user doc doesn't exist yet)
-        try {
-          await db.collection('users').doc(currentUser.uid).update({
-            storiesCount: firebase.firestore.FieldValue.increment(1)
-          });
-        } catch (_) {}
-      }
-
-      // Move to step 2
-      document.getElementById('step-story').style.display = 'none';
-      document.getElementById('step-episodes').style.display = 'block';
-      setStepDone(1);
-      setStepActive(2);
-      toast('Story saved! Now add your first chapter.', 'success');
-
-    } catch (e) {
-      toast('Failed to save story: ' + e.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = 'Save & Add Episodes →';
     }
+    showToast('saved to database', 'success');
+  } catch (e) {
+    var errName = (file && file.name) || 'file';
+    var shortErrName = errName.length > 12 ? errName.substring(0, 12) + '…' : errName;
+    labelEl.innerHTML = '&#128206; Upload'
+      + '<input type="file" accept=".txt,.doc,.docx,.pdf,.rtf,.md" onchange="handleFileSelect(event,\'' + escAttr(epId) + '\')">';
+    showToast('Upload failed: ' + e.message, 'error');
   }
+}
 
-  // ── Save Episode ──────────────────────────────────────────────────────────────
-  async function saveEpisode(status) {
-    const title   = document.getElementById('ep-title').value.trim();
-    const content = document.getElementById('ep-content').value.trim();
-
-    if (!title)   { toast('Please enter a chapter title', 'error'); return; }
-    if (!content) { toast('Please write some content', 'error'); return; }
-    if (content.length < 100) { toast('Chapter should be at least 100 characters', 'error'); return; }
-
-    // Edit mode: update existing episode
-    if (editingEpisodeId) {
-      const btn = document.getElementById('publish-ep-btn');
-      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Updating...';
-      try {
-        const wc = content.split(/\s+/).filter(w => w).length;
-        await db.collection('episodes').doc(editingEpisodeId).update({
-          title, content, wordCount: wc,
-          readTimeMinutes: Math.max(1, Math.round(wc / 200)), status
-        });
-        await db.collection('stories').doc(currentStoryId).update({
-          updatedAt: firebase.firestore.Timestamp.now()
-        });
-        toast('Chapter updated!', 'success');
-        editingEpisodeId = null;
-        removeEditBanner();
-        switchTab('mystories');
-      } catch (e) {
-        toast('Failed to update: ' + e.message, 'error');
-      } finally {
-        btn.disabled = false; btn.innerHTML = 'Publish Chapter';
-      }
-      return;
-    }
-
-    const btn = status === 'PUBLISHED'
-      ? document.getElementById('publish-ep-btn')
-      : null;
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Publishing...'; }
-
-    try {
-      const epRef = db.collection('episodes').doc();
-      const words = content.split(/\s+/).filter(w => w).length;
-      const readMin = Math.max(1, Math.round(words / 200));
-      const isFree = currentChapter === 1;
-      const now = firebase.firestore.Timestamp.now();
-
-      await epRef.set({
-        episodeId:       epRef.id,
-        storyId:         currentStoryId,
-        authorId:        currentUser.uid,
-        chapterNumber:   currentChapter,
-        title,
-        content,
-        wordCount:       words,
-        readTimeMinutes: readMin,
-        unlockCostCoins: isFree ? 0 : 10,
-        isFree,
-        status,
-        likesCount:      0,
-        commentsCount:   0,
-        createdAt:       now
-      });
-
-      if (status === 'PUBLISHED') {
-        await db.collection('stories').doc(currentStoryId).update({
-          totalEpisodes: firebase.firestore.FieldValue.increment(1),
-          updatedAt: firebase.firestore.Timestamp.now()
-        });
-      }
-
-      savedEpisodes.push({ id: epRef.id, chapterNumber: currentChapter, title, wordCount: words, status });
-      renderEpisodeList();
-
-      currentChapter++;
-      document.getElementById('ep-chapter-num').textContent = currentChapter;
-      document.getElementById('ep-title').value = '';
-      document.getElementById('ep-content').value = '';
-      updateWordCount();
-
-      toast(status === 'PUBLISHED' ? 'Chapter published!' : 'Chapter saved as draft', 'success');
-
-    } catch (e) {
-      toast('Failed to save chapter: ' + e.message, 'error');
-    } finally {
-      if (btn) { btn.disabled = false; btn.innerHTML = 'Publish Chapter'; }
-    }
-  }
-
-  function renderEpisodeList() {
-    const list = document.getElementById('ep-list');
-    list.innerHTML = savedEpisodes.map(ep => `
-      <div class="ep-item">
-        <div class="ep-item-left">
-          <div class="ep-num">${ep.chapterNumber}</div>
-          <div class="ep-info">
-            <div class="ep-title-text">${ep.title}</div>
-            <div class="ep-words">${ep.wordCount} words</div>
-          </div>
-        </div>
-        <span class="ep-status ${ep.status.toLowerCase()}">${ep.status === 'PUBLISHED' ? 'Published' : 'Draft'}</span>
-      </div>
-    `).join('');
-  }
-
-  // ── Publish Story ─────────────────────────────────────────────────────────────
-  async function publishStory() {
-    const published = savedEpisodes.filter(e => e.status === 'PUBLISHED');
-    if (published.length === 0) {
-      toast('Publish at least one chapter before publishing the story', 'error');
-      return;
-    }
-
-    const btn = document.getElementById('publish-story-btn');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Publishing...';
-
-    try {
-      await db.collection('stories').doc(currentStoryId).update({
-        status: 'PUBLISHED',
-        updatedAt: firebase.firestore.Timestamp.now()
-      });
-
-      document.getElementById('step-episodes').style.display = 'none';
-      document.getElementById('publish-success').style.display = 'block';
-      setStepDone(2);
-      setStepDone(3);
-
-    } catch (e) {
-      toast('Failed to publish: ' + e.message, 'error');
-      btn.disabled = false;
-      btn.innerHTML = '🚀 Publish Story';
-    }
-  }
-
-  // ── Back to story details ─────────────────────────────────────────────────────
-  function goBackToStory() {
-    document.getElementById('step-episodes').style.display = 'none';
-    document.getElementById('step-story').style.display = 'block';
-    // Reset step 1 indicator to active
-    const s1 = document.getElementById('step-1-indicator');
-    s1.classList.remove('done');
-    s1.classList.add('active');
-    s1.querySelector('.step-num').textContent = '1';
-    const s2 = document.getElementById('step-2-indicator');
-    s2.classList.remove('active');
-    s2.querySelector('.step-num').textContent = '2';
-  }
-
-  // ── Load chapter from file (.txt or .docx) ───────────────────────────────────
-  function loadChapterFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast('File must be under 10MB', 'error'); return; }
-    e.target.value = '';
-
-    const name = file.name.toLowerCase();
-
-    if (name.endsWith('.docx')) {
-      // Use mammoth.js to extract plain text from .docx (same approach as Android FileUtils)
-      const reader = new FileReader();
-      reader.onload = ev => {
-        mammoth.extractRawText({ arrayBuffer: ev.target.result })
-          .then(result => {
-            const text = result.value.trim();
-            if (!text) { toast('Could not extract text from .docx', 'error'); return; }
-            document.getElementById('ep-content').value = text;
-            updateWordCount();
-            toast('Word document loaded — review before publishing', 'success');
-          })
-          .catch(() => toast('Failed to read .docx file', 'error'));
-      };
-      reader.onerror = () => toast('Could not read file', 'error');
-      reader.readAsArrayBuffer(file);
-
-    } else {
-      // Plain text / .txt
-      const reader = new FileReader();
-      reader.onload = ev => {
-        document.getElementById('ep-content').value = ev.target.result.trim();
-        updateWordCount();
-        toast('File loaded — review content before publishing', 'success');
-      };
-      reader.onerror = () => toast('Could not read file', 'error');
-      reader.readAsText(file, 'UTF-8');
-    }
-  }
-
-  // ── Write another ─────────────────────────────────────────────────────────────
-  function writeAnother() {
-    currentStoryId = null;
-    editingExistingStory = false;
-    currentChapter = 1;
-    savedEpisodes = [];
-    coverFile = null;
-    tags = [];
-    renderTags();
-    document.getElementById('story-title').value = '';
-    document.getElementById('story-desc').value = '';
-    document.getElementById('story-category').value = '';
-    document.getElementById('story-language').value = '';
-    document.getElementById('ep-list').innerHTML = '';
-    document.getElementById('ep-title').value = '';
-    document.getElementById('ep-content').value = '';
-    removeCover();
-    updateWordCount();
-    document.getElementById('publish-success').style.display = 'none';
-    document.getElementById('step-story').style.display = 'block';
-    document.getElementById('step-episodes').style.display = 'none';
-    resetSteps();
-  }
-
-  // ── Step indicators ───────────────────────────────────────────────────────────
-  function setStepActive(n) {
-    document.getElementById(`step-${n}-indicator`).classList.add('active');
-  }
-  function setStepDone(n) {
-    const el = document.getElementById(`step-${n}-indicator`);
-    el.classList.remove('active');
-    el.classList.add('done');
-    el.querySelector('.step-num').textContent = '✓';
-  }
-  function resetSteps() {
-    [1,2,3].forEach(n => {
-      const el = document.getElementById(`step-${n}-indicator`);
-      el.classList.remove('active','done');
-      el.querySelector('.step-num').textContent = n;
-    });
-    setStepActive(1);
-  }
-
-  // ── Tabs ──────────────────────────────────────────────────────────────────────
-  function switchTab(tab) {
-    const isNew = tab === 'new';
-    document.getElementById('tab-new').classList.toggle('active', isNew);
-    document.getElementById('tab-mystories').classList.toggle('active', !isNew);
-    document.getElementById('new-story-flow').style.display = isNew ? 'block' : 'none';
-    document.getElementById('my-stories-panel').style.display = isNew ? 'none' : 'block';
-    if (!isNew) loadMyStories();
-  }
-
-  // ── My Stories ────────────────────────────────────────────────────────────────
-  async function loadMyStories() {
-    const list = document.getElementById('stories-list');
-    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)"><span class="spinner" style="border-top-color:var(--orange)"></span></div>';
-    try {
-      const snap = await db.collection('stories')
-        .where('authorId', '==', currentUser.uid)
-        .get();
-      const stories = snap.docs.map(d => d.data())
-        .sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0));
-      document.getElementById('stories-count-badge').textContent = stories.length ? `(${stories.length})` : '';
-      if (stories.length === 0) {
-        list.innerHTML = '<div class="stories-empty"><div style="font-size:48px">📖</div><p>No stories yet. Click "Write New Story" to start.</p></div>';
-        return;
-      }
-      list.innerHTML = stories.map(s => renderStoryCard(s)).join('');
-    } catch (e) {
-      list.innerHTML = `<div class="stories-empty"><p style="color:var(--error)">Failed to load stories: ${e.message}</p></div>`;
-    }
-  }
-
-  function renderStoryCard(s) {
-    const thumb = s.coverUrl
-      ? `<img src="${s.coverUrl}" alt="">`
-      : `<span>📖</span>`;
-    return `
-    <div class="story-card" id="card-${s.storyId}">
-      <div class="story-card-header" onclick="toggleStoryCard('${s.storyId}')">
-        <div class="story-card-left">
-          <div class="story-cover-thumb">${thumb}</div>
-          <div class="story-meta">
-            <div class="story-meta-title">${escHtml(s.title)}</div>
-            <div class="story-meta-sub">
-              <span class="story-badge ${s.status.toLowerCase()}">${s.status}</span>
-              <span>${s.category} · ${s.language}</span>
-              <span>${s.totalEpisodes} chapter${s.totalEpisodes !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-        </div>
-        <span class="story-card-toggle">▾</span>
-      </div>
-      <div class="story-card-body" id="body-${s.storyId}">
-        <div class="story-actions">
-          <button class="action-btn" onclick="editStoryDetails('${s.storyId}')">✏ Edit Details</button>
-          <button class="action-btn" onclick="addChapterToExisting('${s.storyId}', ${s.totalEpisodes})">+ Add Chapter</button>
-          ${s.status === 'DRAFT' ? `<button class="action-btn" onclick="publishExistingStory('${s.storyId}')">🚀 Publish Story</button>` : ''}
-          <button class="action-btn danger" onclick="deleteStory('${s.storyId}', '${escHtml(s.title)}')">🗑 Delete</button>
-        </div>
-        <div class="chapters-label">Chapters</div>
-        <div id="chapters-${s.storyId}">
-          <div class="chapters-empty"><span class="spinner" style="border-top-color:var(--orange)"></span></div>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  async function toggleStoryCard(storyId) {
-    const card = document.getElementById(`card-${storyId}`);
-    const isExpanded = card.classList.contains('expanded');
-    card.classList.toggle('expanded', !isExpanded);
-    if (!isExpanded) loadChapters(storyId);
-  }
-
-  async function loadChapters(storyId) {
-    const container = document.getElementById(`chapters-${storyId}`);
-    try {
-      const snap = await db.collection('episodes')
-        .where('storyId', '==', storyId)
-        .get();
-      const eps = snap.docs.map(d => d.data())
-        .sort((a, b) => (a.chapterNumber || 0) - (b.chapterNumber || 0));
-      if (eps.length === 0) {
-        container.innerHTML = '<div class="chapters-empty">No chapters yet.</div>';
-        return;
-      }
-      container.innerHTML = eps.map(ep => `
-        <div class="chapter-row" id="chrow-${ep.episodeId}">
-          <div class="chapter-row-left">
-            <div class="ch-num">${ep.chapterNumber}</div>
-            <div class="ch-info">
-              <div class="ch-title">${escHtml(ep.title)}</div>
-              <div class="ch-meta">${ep.wordCount} words · ${ep.status === 'PUBLISHED' ? '<span style="color:var(--success)">Published</span>' : 'Draft'}</div>
-            </div>
-          </div>
-          <div class="ch-actions">
-            <button class="ch-btn" onclick="editChapter('${ep.episodeId}', '${storyId}')">Edit</button>
-            <button class="ch-btn danger" onclick="deleteChapter('${ep.episodeId}', '${storyId}', ${ep.chapterNumber})">Delete</button>
-          </div>
-        </div>`).join('');
-    } catch (e) {
-      container.innerHTML = `<div class="chapters-empty" style="color:var(--error)">Failed to load chapters</div>`;
-    }
-  }
-
-  // ── Edit story details ─────────────────────────────────────────────────────────
-  async function editStoryDetails(storyId) {
-    try {
-      const doc = await db.collection('stories').doc(storyId).get();
-      const s = doc.data();
-      currentStoryId = storyId;
-      editingExistingStory = true;
-      document.getElementById('story-title').value    = s.title || '';
-      document.getElementById('story-desc').value     = s.description || '';
-      document.getElementById('story-category').value = s.category || '';
-      document.getElementById('story-language').value = s.language || '';
-      tags = s.tags || [];
-      renderTags();
-      // Switch to new story flow, show step 1
-      switchTab('new');
-      document.getElementById('step-story').style.display = 'block';
-      document.getElementById('step-episodes').style.display = 'none';
-      document.getElementById('publish-success').style.display = 'none';
-      resetSteps();
-      document.getElementById('save-story-btn').textContent = 'Update Story →';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      toast('Editing story — update details and save', 'success');
-    } catch (e) {
-      toast('Failed to load story: ' + e.message, 'error');
-    }
-  }
-
-  // ── Add chapter to existing story ─────────────────────────────────────────────
-  function addChapterToExisting(storyId, totalEpisodes) {
-    currentStoryId = storyId;
-    currentChapter = totalEpisodes + 1;
-    editingEpisodeId = null;
-    switchTab('new');
-    document.getElementById('step-story').style.display = 'none';
-    document.getElementById('step-episodes').style.display = 'block';
-    document.getElementById('publish-success').style.display = 'none';
-    document.getElementById('ep-chapter-num').textContent = currentChapter;
-    document.getElementById('ep-title').value = '';
-    document.getElementById('ep-content').value = '';
-    document.getElementById('ep-list').innerHTML = '';
-    savedEpisodes = [];
-    updateWordCount();
-    removeEditBanner();
-    setStepDone(1);
-    setStepActive(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast(`Adding Chapter ${currentChapter} to your story`, 'success');
-  }
-
-  // ── Publish existing draft story ──────────────────────────────────────────────
-  async function publishExistingStory(storyId) {
-    if (!confirm('Publish this story? It will be visible to all readers on the app.')) return;
-    try {
-      await db.collection('stories').doc(storyId).update({
-        status: 'PUBLISHED',
-        updatedAt: firebase.firestore.Timestamp.now()
-      });
-      toast('Story published!', 'success');
-      loadMyStories();
-    } catch (e) {
-      toast('Failed to publish: ' + e.message, 'error');
-    }
-  }
-
-  // ── Delete story ──────────────────────────────────────────────────────────────
-  async function deleteStory(storyId, title) {
-    if (!confirm(`Delete "${title}"?\n\nThis will permanently delete the story and ALL its chapters. This cannot be undone.`)) return;
-    try {
-      // Delete all episodes first
-      const epSnap = await db.collection('episodes').where('storyId', '==', storyId).get();
-      const batch = db.batch();
-      epSnap.docs.forEach(d => batch.delete(d.ref));
-      batch.delete(db.collection('stories').doc(storyId));
-      await batch.commit();
-      try {
-        await db.collection('users').doc(currentUser.uid).update({
-          storiesCount: firebase.firestore.FieldValue.increment(-1)
-        });
-      } catch (_) {}
-      toast('Story deleted', 'success');
-      loadMyStories();
-    } catch (e) {
-      toast('Failed to delete: ' + e.message, 'error');
-    }
-  }
-
-  // ── Edit chapter ──────────────────────────────────────────────────────────────
-  let editingEpisodeId = null;
-
-  async function editChapter(episodeId, storyId) {
-    try {
-      const doc = await db.collection('episodes').doc(episodeId).get();
-      const ep = doc.data();
-      editingEpisodeId = episodeId;
-      currentStoryId = storyId;
-      currentChapter = ep.chapterNumber;
-      switchTab('new');
-      document.getElementById('step-story').style.display = 'none';
-      document.getElementById('step-episodes').style.display = 'block';
-      document.getElementById('publish-success').style.display = 'none';
-      document.getElementById('ep-chapter-num').textContent = ep.chapterNumber;
-      document.getElementById('ep-title').value   = ep.title || '';
-      document.getElementById('ep-content').value = ep.content || '';
-      document.getElementById('ep-list').innerHTML = '';
-      savedEpisodes = [];
-      updateWordCount();
-      showEditBanner(`Editing Chapter ${ep.chapterNumber}: ${ep.title}`);
-      setStepDone(1);
-      setStepActive(2);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) {
-      toast('Failed to load chapter: ' + e.message, 'error');
-    }
-  }
-
-  function showEditBanner(text) {
-    removeEditBanner();
-    const banner = document.createElement('div');
-    banner.className = 'ep-edit-banner';
-    banner.id = 'ep-edit-banner';
-    banner.innerHTML = `<span>✏ ${escHtml(text)}</span><button onclick="cancelEditChapter()">✕ Cancel edit</button>`;
-    document.getElementById('ep-form').prepend(banner);
-    document.getElementById('publish-ep-btn').textContent = 'Update Chapter';
-  }
-
-  function removeEditBanner() {
-    document.getElementById('ep-edit-banner')?.remove();
-    document.getElementById('publish-ep-btn').textContent = 'Publish Chapter';
-  }
-
-  function cancelEditChapter() {
-    editingEpisodeId = null;
-    removeEditBanner();
-    switchTab('mystories');
-  }
-
-  // ── Delete chapter ────────────────────────────────────────────────────────────
-  async function deleteChapter(episodeId, storyId, chapterNum) {
-    if (!confirm(`Delete Chapter ${chapterNum}? This cannot be undone.`)) return;
-    try {
-      await db.collection('episodes').doc(episodeId).delete();
-      await db.collection('stories').doc(storyId).update({
+// ── Delete chapter ────────────────────────────────────────────────────────────
+async function deleteChapter(epId, chNum) {
+  if (!confirm('Delete Chapter ' + chNum + '? This cannot be undone.')) return;
+  try {
+    await db.collection('episodes').doc(epId).delete();
+    // Update story totalEpisodes
+    if (selectedStoryId) {
+      await db.collection('stories').doc(selectedStoryId).update({
         totalEpisodes: firebase.firestore.FieldValue.increment(-1),
         updatedAt: firebase.firestore.Timestamp.now()
       });
-      document.getElementById(`chrow-${episodeId}`)?.remove();
-      toast('Chapter deleted', 'success');
-      loadMyStories();
-    } catch (e) {
-      toast('Failed to delete chapter: ' + e.message, 'error');
+      var story = stories.find(function(s) { return s.id === selectedStoryId; });
+      if (story) story.totalEpisodes = Math.max(0, (story.totalEpisodes || 0) - 1);
     }
+    chapters = chapters.filter(function(c) { return c.id !== epId; });
+    document.getElementById('chapter-count').textContent = chapters.length;
+    renderChaptersTable();
+    renderStoryList();
+    // Update Add Chapter button
+    var maxNum = 0;
+    chapters.forEach(function(c) { if ((c.chapterNumber || 0) > maxNum) maxNum = c.chapterNumber || 0; });
+    document.getElementById('add-chapter-btn').href =
+      'kathakar-add-chapter.html?storyId=' + encodeURIComponent(selectedStoryId) + '&chapterNum=' + (maxNum + 1);
+    showToast('Chapter deleted', 'success');
+  } catch (e) {
+    showToast('Delete failed: ' + e.message, 'error');
   }
+}
 
-  // ── Helpers ───────────────────────────────────────────────────────────────────
-  function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function formatDate(ts) {
+  if (!ts) return '—';
+  try {
+    var d = ts.toDate ? ts.toDate() : new Date((ts.seconds || 0) * 1000);
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch (_) { return '—'; }
+}
 
-  // ── Toast ─────────────────────────────────────────────────────────────────────
-  let toastTimer;
-  function toast(msg, type = '') {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = 'show' + (type ? ' ' + type : '');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.className = '', 3000);
-  }
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function escAttr(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+var toastTimer;
+function showToast(msg, type) {
+  type = type || 'info';
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.setAttribute('data-toast-type', type);
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
 </script>
 </body>
 </html>
